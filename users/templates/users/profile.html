@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+    {{ userprofile.user.get_username }}
+{% endblock %}
+{% block content %}
+ <div class="card mb-3" >
+  <div class="row no-gutters">
+    <div class="col-md-2">
+      {% if userprofile.profile_img %}
+    <img src="{{ userprofile.profile_img.url }}" class="card-img" />
+      {% else %}
+          <img src="{% static 'blog/images/def_img.jpg' %}" class="card-img" />
+    {% endif %}
+    </div>
+    <div class="col-md-10">
+      <div class="card-body">
+        <h5 class="card-title">{{ userprofile.user.first_name }} {{ userprofile.user.last_name }} | {{ userprofile.user.get_username }}</h5>
+          <p class="small text-muted">
+              {% if userprofile.instagram_link %}
+              <a href="{{ userprofile.instagram_link }}">Instagram</a>
+              {% endif %}
+            {% if userprofile.facebook_link %}
+              <a href="{{ userprofile.facebook_link }}">Facebook</a>
+          {% endif %}
+          {% if userprofile.twitter_link %}
+              <a href="{{ userprofile.twitter_link }}">Twitter</a>
+          {% endif %}
+          {% if userprofile.website_link %}
+              <a href="{{ userprofile.website_link }}">Website</a>
+          {% endif %}
+          </p>
+        <p class="card-text">{{ userprofile.bio }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+    <br/>
+    <hr>
+    <br/>
+    <h2>Posts</h2>
+    <br/>
+
+    {% if post_list %}
+<ul class="list-group">
+    {% for post in post_list %}
+        <li class="list-group-item">
+            <strong>{{ post.category }}</strong> |
+            <a href="{% url 'blog:detail' post.id %}"> {{ post.title }}</a> | {{ post.author }}
+        {% if user.is_authenticated and user.id == post.author.id %}
+        <a href="{% url 'blog:update_post' post.id %}" ><small>Edit |</small></a> <a href="{% url 'blog:delete_post' post.id %}" ><small>Delete</small></a>
+        {% endif %}
+        <p>{{ post.snippet }}</p>
+        <br/>
+        <p>{{ post.likes.count }} <img src="https://img.icons8.com/color/48/000000/like--v1.png" width="25" height="25" /></p>
+      </li>
+    {% endfor %}
+</ul>
+{% else %}
+    <p>No posts available</p>
+{% endif %}
+
+{% endblock %}

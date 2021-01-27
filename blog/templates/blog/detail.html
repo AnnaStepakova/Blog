@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+    {{ blogpost.tag }}
+{% endblock %}
+{% block content %}
+
+    <h1>{{ blogpost.title }} <small>| <a href="{% url 'blog:category' blogpost.category %}">{{ blogpost.category }}</a> | {{ blogpost.tag }}</small></h1>
+    By: <a href="{% url 'users:profile' blogpost.author.userprofile.id %}" >{{ blogpost.author.get_username }} </a> <small>({{ blogpost.author.first_name }} {{ blogpost.author.last_name }})
+    <small>{{ blogpost.pub_date }}</small>
+    {% if user.is_authenticated and user.id == blogpost.author.id %}
+        <a href="{% url 'blog:update_post' blogpost.id %}" >Edit</a> | <a href="{% url 'blog:delete_post' blogpost.id %}" >Delete</a>
+        {% endif %}
+    </small><br/>
+
+    <hr>
+    {% if blogpost.header_img %}
+    <img src="{{ blogpost.header_img.url }}" style="max-width:600px;width:100%;max-height:500px"/>
+    {% endif %}
+    <br/>
+    <p>{{ blogpost.text|safe }} </p>
+    {% if user.is_authenticated %}
+        {% if liked %}
+        <form action="{% url 'blog:like_post' blogpost.id %}" method="post" >
+              {% csrf_token %}
+            <div class="btn-group" role="group" aria-label="Basic mixed styles example">
+                <button type="button" class="btn btn-danger" disabled>{{ blogpost.likes.count }}</button>
+              <button class="btn btn-danger btn-sm" type='submit'  name="blogpost_id" value="{{ blogpost.id }}"> <img src="https://img.icons8.com/color/48/000000/like--v1.png" width="25" height="25" /> </button>
+            </div>
+        </form>
+            {% else %}
+            <form action="{% url 'blog:like_post' blogpost.id %}" method="post" >
+              {% csrf_token %}
+              <div class="btn-group" role="group" aria-label="Basic mixed styles example">
+                <button type="button" class="btn btn-danger" disabled>{{ blogpost.likes.count }}</button>
+                <button class="btn btn-outline-danger btn-sm" type='submit'  name="blogpost_id" value="{{ blogpost.id }}"> <img src="https://img.icons8.com/color/48/000000/like--v1.png" width="25" height="25"/>  </button>
+              </div>
+        </form>
+            {% endif %}
+
+    {% endif %}
+    <br/><br/>
+<a class="btn btn-secondary btn-sm" href="{% url 'blog:index' %}" role="button">Back</a>
+ {% endblock %}

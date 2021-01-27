@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}
+    Create New Profile Page
+{% endblock %}
+{% block content %}
+
+        {% if user.is_authenticated %}
+
+    <h1>Create New Profile Page for {{ user.get_username }}</h1>
+    <br/>
+<div class="form-group">
+<form method="post" enctype="multipart/form-data">  <!-- enctype is to enable uploading images -->
+{% csrf_token %}
+{{ form.as_p }}
+    <br/>
+    <button class="btn btn-secondary btn-sm" type='submit'> Create </button>
+</form>
+</div>
+<!-- This script enables user to have automaticly set their name for the post -->
+
+   {% else %}
+
+    <p>You are not authenticated!</p>
+
+    {% endif %}
+
+ {% endblock %}

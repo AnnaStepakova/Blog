@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}
+Categories
+{% endblock %}
+{% block content %}
+
+<h1>Categories<strong>{{ cat }}</strong></h1>
+    <br/>
+{% if cat_list %}
+<ul class="list-group">
+    {% for cat in cat_list %}
+        <li class="list-group-item">
+            <a href="{% url 'blog:category' cat %}"> {{ cat }} </a> {{ num }}
+        </li>
+    {% endfor %}
+</ul>
+{% else %}
+    <p>No categories available</p>
+{% endif %}
+
+ {% endblock %}
