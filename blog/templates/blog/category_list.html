@@ -8,9 +8,9 @@ Categories
     <br/>
 {% if cat_list %}
 <ul class="list-group">
-    {% for cat in cat_list %}
+    {% for category in categories %}
         <li class="list-group-item">
-            <a href="{% url 'blog:category' cat %}"> {{ cat }} </a> {{ num }}
+            <a href="{% url 'blog:category' category.name %}"> {{ category.name }} </a> ({{category.posts_count}})
         </li>
     {% endfor %}
 </ul>

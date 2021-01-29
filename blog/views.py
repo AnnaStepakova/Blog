@@ -6,6 +6,7 @@ from django.urls import reverse
 from .forms import BlogPostForm, UpdateBlogPostForm
 from django.urls import reverse_lazy
 from django.db.models import Q
+from django.db.models import Count
 
 
 class IndexView(generic.ListView):
@@ -54,13 +55,11 @@ class CategoryAllView(generic.ListView):
     def get_queryset(self):
         return Category.objects.all()
 
-    # def get_context_data(self, **kwargs):
-    #     lst = {}
-    #     for cat in Category.objects.values():
-    #         lst[cat] = BlogPost.objects.filter(category=cat).count()
-    #     data = super(CategoryAllView, self).get_context_data(**kwargs)
-    #     data['list'] = lst
-    #     return data
+    def get_context_data(self, **kwargs):
+        categories = Category.objects.all().annotate(posts_count=Count('blogpost'))
+        data = super(CategoryAllView, self).get_context_data(**kwargs)
+        data['categories'] = categories
+        return data
 
 
 class UpdatePostView(generic.UpdateView):
