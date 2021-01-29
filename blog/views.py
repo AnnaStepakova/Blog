@@ -17,7 +17,7 @@ class IndexView(generic.ListView):
 
 
 def category_view(request, cat):
-    post_list = BlogPost.objects.filter(category__contains=cat)
+    post_list = BlogPost.objects.filter(category__name=cat)
     cat_menu = Category.objects.all()
     return render(request, 'blog/category.html', {'post_list': post_list, 'cat': cat, 'cat_menu': cat_menu})
 

@@ -27,8 +27,8 @@ class BlogPost(models.Model):
     likes = models.ManyToManyField(User, related_name='blogposts')
     tag = models.CharField(max_length=150, default="No tag")
     # it should be a foreign key!! or not...
-    # category_link = models.ForeignKey(Category, on_delete=models.CASCADE, null=True)
-    category = models.CharField(max_length=150, default="uncategorized")
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
+    # category = models.CharField(max_length=150, default="uncategorized")
 
     def __str__(self):
         if self.likes == 0:
