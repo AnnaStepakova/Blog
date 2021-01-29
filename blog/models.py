@@ -26,25 +26,13 @@ class BlogPost(models.Model):
     liked = models.BooleanField(default=False)
     likes = models.ManyToManyField(User, related_name='blogposts')
     tag = models.CharField(max_length=150, default="No tag")
-    # it should be a foreign key!! or not...
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
-    # category = models.CharField(max_length=150, default="uncategorized")
 
     def __str__(self):
-        if self.likes == 0:
-            return f"{self.pub_date}: {self.title} - Not Liked"
-        else:
-            return f"{self.pub_date}: {self.title} - Liked"
+        return f"{self.author.username}: {self.title}"
 
     def get_absolute_url(self):
         return reverse('blog:index')
-        # return reverse('blog:detail', args=(str(self.id),))
-
-    # def if_liked_by_user(self, user_id):
-    #     if self.likes.filter(id=user_id).exists():
-    #         return True
-    #     else:
-    #         return False
 
 
 class UserProfile(models.Model):
@@ -61,6 +49,3 @@ class UserProfile(models.Model):
 
     def get_absolute_url(self):
         return reverse('blog:index')
-
-
-
