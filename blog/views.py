@@ -3,7 +3,7 @@ from django.views import generic
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from .forms import BlogPostForm, UpdateBlogPostForm
+from .forms import BlogPostForm, UpdateBlogPostForm, AddCategoryForm
 from django.urls import reverse_lazy
 from django.db.models import Q
 from django.db.models import Count
@@ -42,9 +42,8 @@ class AddPostView(generic.CreateView):
 
 
 class AddCategoryView(generic.CreateView):
-    model = Category
     template_name = 'blog/add_category.html'
-    fields = '__all__'
+    form_class = AddCategoryForm
 
 
 class CategoryAllView(generic.ListView):

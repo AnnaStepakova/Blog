@@ -34,3 +34,13 @@ class UpdateBlogPostForm(forms.ModelForm):
             'snippet': forms.Textarea(attrs={'class': 'form-control'}),
             'text': forms.Textarea(attrs={'class': 'form-control'}),
         }
+
+
+class AddCategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ['name']
+
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'})
+        }
