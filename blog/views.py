@@ -19,8 +19,7 @@ class IndexView(generic.ListView):
 
 def category_view(request, cat):
     post_list = BlogPost.objects.filter(category__name=cat)
-    cat_menu = Category.objects.all()
-    return render(request, 'blog/category.html', {'post_list': post_list, 'cat': cat, 'cat_menu': cat_menu})
+    return render(request, 'blog/category.html', {'post_list': post_list, 'cat': cat})
 
 
 class DetailView(generic.DetailView):
@@ -74,7 +73,6 @@ class DeletePostView(generic.DeleteView):
     success_url = reverse_lazy('blog:index')
 
 
-# TODO: use form!!!
 class SortTagView(generic.ListView):
     model = BlogPost
     template_name = 'blog/sort_tag.html'
@@ -84,7 +82,6 @@ class SortTagView(generic.ListView):
         query = self.request.GET.get('tag')
         return BlogPost.objects.filter(Q(tag__contains=query) | Q(title__contains=query))
 
-    # TODO: figure out how to pass the parameter without repeating the request.GET line
     def get_context_data(self, **kwargs):  # allows to pass additional params to the template
         data = super().get_context_data(**kwargs)
         data['tag'] = self.request.GET.get('tag')

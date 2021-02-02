@@ -13,7 +13,7 @@ class ProfilePageView(generic.DetailView):
     model = UserProfile
     template_name = 'users/profile.html'
 
-    def get_context_data(self, **kwargs):  # allows to pass additional params to the template
+    def get_context_data(self, **kwargs):
         data = super(ProfilePageView, self).get_context_data(**kwargs)
         profile = get_object_or_404(UserProfile, id=self.kwargs['pk'])
         data['userprofile'] = profile
@@ -23,14 +23,12 @@ class ProfilePageView(generic.DetailView):
 
 
 class EditProfilePageView(generic.UpdateView):
-    # model = UserProfile
     form_class = EditProfilePageForm
     template_name = 'users/edit_profile_page.html'
     success_url = reverse_lazy('blog:index')
 
     def get_object(self):
         return self.request.user.userprofile
-    # fields = ['bio', 'profile_img', 'instagram_link', 'facebook_link', 'twitter_link', 'website_link']
 
 
 class CreateProfilePageView(generic.CreateView):
