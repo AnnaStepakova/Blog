@@ -3,4 +3,6 @@ venv
 *.log
 *.pot
 *.pyc
-__pycache__/.env
+__pycache__/
+local_settings.py
+.env
