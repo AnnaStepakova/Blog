@@ -31,8 +31,9 @@ class BlogPostTest(TestCase):
 
     def setUp(self):
         self.category = Category.objects.create(name='cat')
-        self.user = User.objects.create(username='BoB', first_name='Bob', last_name='Adams', password='okt11102012')
-        self.post = BlogPost.objects.create(author=self.user, title='test', snippet='test post', text='TestTest', tag='testing', category=self.category)
+        self.user = User.objects.create(username='BoB', first_name='Bob', last_name='Adams', password='okt1267345')
+        self.post = BlogPost.objects.create(author=self.user, title='test', snippet='test post', text='TestTest',
+                                            tag='testing', category=self.category)
 
     def test_author_label(self):
         post = BlogPost.objects.get(id=1)
