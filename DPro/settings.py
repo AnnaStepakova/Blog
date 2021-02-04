@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 import os
+import django_on_heroku
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -141,3 +142,5 @@ STATICFILES_DIRS = (
 LOGIN_REDIRECT_URL = 'blog:index'
 
 LOGOUT_REDIRECT_URL = 'blog:index'
+
+django_on_heroku.settings(locals())
