@@ -28,11 +28,11 @@ class EditProfileForm(UserChangeForm):
     first_name = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
     last_name = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
     username = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    last_login = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'hidden'}))
+    # last_login = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'hidden'}))
     is_superuser = forms.CharField(max_length=100, widget=forms.CheckboxInput(attrs={'class': 'form-check', 'type': 'hidden'}))
     is_staff = forms.CharField(max_length=100, widget=forms.CheckboxInput(attrs={'class': 'form-check', 'type': 'hidden'}))
     is_active = forms.CharField(max_length=100, widget=forms.CheckboxInput(attrs={'class': 'form-check', 'type': 'hidden'}))
-    date_joined = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'hidden'}))
+    # date_joined = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'hidden'}))
     password = None
 
     class Meta:
