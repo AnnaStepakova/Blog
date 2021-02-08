@@ -49,3 +49,13 @@ class UserProfile(models.Model):
 
     def get_absolute_url(self):
         return reverse('blog:index')
+
+
+class Comment(models.Model):
+    blogpost = models.ForeignKey(BlogPost, related_name="comments", on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    body = models.TextField(max_length=500)
+    date_posted = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.author.get_username() + '|' + self.blogpost.title + '|' + self.body

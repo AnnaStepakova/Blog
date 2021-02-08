@@ -1,6 +1,6 @@
 from django import forms
-from .models import BlogPost, Category
-
+from .models import BlogPost, Category, Comment
+# git commit -m "Revert changes in forms.py (otherwise nothing worked)"
 
 def get_choise_list():
     return [item for item in Category.objects.all().values_list('name', 'name')]
@@ -76,3 +76,12 @@ class AddCategoryForm(forms.ModelForm):
         #     self.widgets = {
         #         'name': forms.TextInput(attrs={'class': 'form-control'})
         #     }
+
+
+class CommentForm(forms.ModelForm):
+
+    body = forms.CharField(label=False, widget=forms.Textarea(attrs={'class': 'form-control'}))
+
+    class Meta:
+        model = Comment
+        fields = ['body']

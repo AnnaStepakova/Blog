@@ -39,6 +39,34 @@
             {% endif %}
 
     {% endif %}
+<br/><hr>
+
+    {% if user.is_authenticated %}
+        <p>Leave a comment...</p>
+        <form method="post">
+            {% csrf_token %}
+            {{ comment_form }}
+            <br/>
+            <button class="btn btn-secondary btn-sm" type='submit'> Add Comment </button>
+        </form>
+    {% else %}
+        <p>You should be logged in to leave a comment!</p>
+    {% endif %}
+<br/>
+
+    {{ blogpost.comments.count }} comment(s) already...
+    <br/>
+    <br/>
+    {% if comments %}
+        <ul class="list-group">
+        {% for comment in comments %}
+            <li class="list-group-item">
+                <p><strong>{{ comment.author.get_username }}</strong> | <small>{{ comment.date_posted }}</small> : {{ comment.body|safe }}</p>
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
     <br/><br/>
 <a class="btn btn-secondary btn-sm" href="{% url 'blog:index' %}" role="button">Back</a>
  {% endblock %}

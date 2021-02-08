@@ -1,9 +1,9 @@
-from .models import BlogPost, Category
+from .models import BlogPost, Category, Comment
 from django.views import generic
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from .forms import BlogPostForm, UpdateBlogPostForm, AddCategoryForm
+from .forms import BlogPostForm, UpdateBlogPostForm, AddCategoryForm, CommentForm
 from django.urls import reverse_lazy
 from django.db.models import Q
 from django.db.models import Count
@@ -33,7 +33,17 @@ class DetailView(generic.DetailView):
         if curr_post.likes.filter(id=self.request.user.id).exists():
             liked = True
         data['liked'] = liked
+        comments_connected = Comment.objects.filter(
+            blogpost=self.get_object()).order_by('-date_posted')
+        data['comments'] = comments_connected
+        if self.request.user.is_authenticated:
+            data['comment_form'] = CommentForm(instance=self.request.user)
         return data
+
+    def post(self, request, *args, **kwargs):
+        new_comment = Comment(blogpost=self.get_object(), author=self.request.user, body=request.POST.get('body'))
+        new_comment.save()
+        return HttpResponseRedirect(reverse('blog:detail', args=[str(self.get_object().pk)]))
 
 
 class AddPostView(generic.CreateView):
