@@ -49,7 +49,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crispy_forms',
     'ckeditor',
+    'django_nose',
 ]
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
@@ -154,9 +157,9 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
 
-LOGIN_REDIRECT_URL = 'blog:index'
+LOGIN_REDIRECT_URL = 'home:home'
 
-LOGOUT_REDIRECT_URL = 'blog:index'
+LOGOUT_REDIRECT_URL = 'home:home'
 
 django_on_heroku.settings(locals())
 options = DATABASES['default'].get('OPTIONS', {})

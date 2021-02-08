@@ -22,11 +22,15 @@
 
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav mr-auto">
+    <li class="nav-item">
+             <a class="nav-link" href="{% url 'home:home' %}">Home</a>
+            </li>
          {% if user.is_authenticated %}
             <li class="nav-item">
              <a class="nav-link" href="{% url 'blog:add_post' %}">Add Post</a>
             </li>
           {% endif %}
+
     <li class="nav-item dropdown">
        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           Categories
@@ -68,7 +72,7 @@
                 {% else %}
             <a class="dropdown-item" href="{% url 'users:create_profile' %}">Create Profile Page</a>
                 {% endif %}
-        <a class="dropdown-item" href="{% url 'users:edit' %}">Edit Settings</a>
+     <!--   <a class="dropdown-item" href="{% url 'users:edit' %}">Edit Settings</a> -->
         </div>
       </li>
 
@@ -76,12 +80,12 @@
                 <a class="nav-link" href="{% url 'logout' %}">Sign Out</a>
               </li>
           {% else %}
-          <li class="nav-item">
+    <!--      <li class="nav-item">
         <a class="nav-link" href="{% url 'users:register' %}">Sign Up</a>
       </li>
         <li class="nav-item">
         <a class="nav-link" href="{% url 'login' %}">Sign In</a>
-      </li>
+      </li> -->
           {% endif %}
       </ul>
   </div>
