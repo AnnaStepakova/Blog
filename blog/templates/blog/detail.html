@@ -6,7 +6,12 @@
 {% block content %}
 
     <h1>{{ blogpost.title }} <small>| <a href="{% url 'blog:category' blogpost.category %}">{{ blogpost.category }}</a> | {{ blogpost.tag }}</small></h1>
-    By: <a href="{% url 'users:profile' blogpost.author.userprofile.id %}" >{{ blogpost.author.get_username }} </a> <small>({{ blogpost.author.first_name }} {{ blogpost.author.last_name }})
+    {% if blogpost.author.userprofile %}
+    By: <a href="{% url 'users:profile' blogpost.author.userprofile.id %}" >{{ blogpost.author.get_username }} </a>
+    {% else %}
+    By: <a>{{ blogpost.author.get_username }} </a>
+    {% endif %}
+    <small>({{ blogpost.author.first_name }} {{ blogpost.author.last_name }})
     <small>{{ blogpost.pub_date }}</small>
     {% if user.is_authenticated and user.id == blogpost.author.id %}
         <a href="{% url 'blog:update_post' blogpost.id %}" >Edit</a> | <a href="{% url 'blog:delete_post' blogpost.id %}" >Delete</a>
@@ -62,6 +67,12 @@
         {% for comment in comments %}
             <li class="list-group-item">
                 <p><strong>{{ comment.author.get_username }}</strong> | <small>{{ comment.date_posted }}</small> : {{ comment.body|safe }}</p>
+                {% if user.is_authenticated and user.id == comment.author.id%}
+            <form action="{% url 'blog:delete_comment' blogpost.id comment.id %}" method="post" >
+                {% csrf_token %}
+                <a class="link-primary" type='submit'> <small>Delete</small> </a>
+            </form>
+            {% endif %}
             </li>
         {% endfor %}
         </ul>

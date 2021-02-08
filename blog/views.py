@@ -1,3 +1,4 @@
+from django.contrib import messages
 from .models import BlogPost, Category, Comment
 from django.views import generic
 from django.shortcuts import get_object_or_404, render
@@ -109,4 +110,12 @@ def like(request, post_id):
     return HttpResponseRedirect(reverse('blog:detail', args=[str(post_id)]))
 
 
-
+def delete_comment(request, pk, id):
+    comment = get_object_or_404(Comment, id=id)
+    # post_id = request.POST['blogpost_id']
+    try:
+        comment.delete()
+        messages.success(request, 'You successfully deleted the comment')
+    except:
+        messages.warning(request, 'The comment could not be deleted.')
+    return HttpResponseRedirect(reverse('blog:detail', args=[str(pk)]))
