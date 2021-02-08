@@ -89,7 +89,7 @@ class SortTagView(generic.ListView):
 
     def get_queryset(self):
         query = self.request.GET.get('tag')
-        return BlogPost.objects.filter(Q(tag__contains=query) | Q(title__contains=query))
+        return BlogPost.objects.filter(Q(tag__contains=query) | Q(title__contains=query) | Q(author__username=query))
 
     def get_context_data(self, **kwargs):  # allows to pass additional params to the template
         data = super().get_context_data(**kwargs)
