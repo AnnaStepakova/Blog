@@ -8,41 +8,71 @@ def get_choise_list():
 
 class BlogPostForm(forms.ModelForm):
     class Meta:
-        def __init__(self):
-            self.model = BlogPost
-            self.fields = ['author', 'category', 'tag', 'title', 'header_img', 'snippet', 'text']
+        model = BlogPost
+        fields = ['author', 'category', 'tag', 'title', 'header_img', 'snippet', 'text']
 
-            self.widgets = {
-                'author': forms.TextInput(attrs={'class': 'form-control', 'value': '', 'id': 'member', 'type': 'hidden'}),
-                'category': forms.Select(choices=get_choise_list(), attrs={'class': 'form-control'}),
-                'tag': forms.TextInput(attrs={'class': 'form-control'}),
-                'title': forms.TextInput(attrs={'class': 'form-control'}),  # form-control is a css class
-                'snippet': forms.Textarea(attrs={'class': 'form-control'}),
-                'text': forms.Textarea(attrs={'class': 'form-control'}),
-            }
+        widgets = {
+            'author': forms.TextInput(attrs={'class': 'form-control', 'value': '', 'id': 'member', 'type': 'hidden'}),
+            'category': forms.Select(choices=get_choise_list(), attrs={'class': 'form-control'}),
+            'tag': forms.TextInput(attrs={'class': 'form-control'}),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),  # form-control is a css class
+            'snippet': forms.Textarea(attrs={'class': 'form-control'}),
+            'text': forms.Textarea(attrs={'class': 'form-control'}),
+        }
+
+        # def __init__(self):
+        #     self.model = BlogPost
+        #     self.fields = ['author', 'category', 'tag', 'title', 'header_img', 'snippet', 'text']
+        #
+        #     self.widgets = {
+        #         'author': forms.TextInput(attrs={'class': 'form-control', 'value': '', 'id': 'member', 'type': 'hidden'}),
+        #         'category': forms.Select(choices=get_choise_list(), attrs={'class': 'form-control'}),
+        #         'tag': forms.TextInput(attrs={'class': 'form-control'}),
+        #         'title': forms.TextInput(attrs={'class': 'form-control'}),  # form-control is a css class
+        #         'snippet': forms.Textarea(attrs={'class': 'form-control'}),
+        #         'text': forms.Textarea(attrs={'class': 'form-control'}),
+        #     }
 
 
 class UpdateBlogPostForm(forms.ModelForm):
     class Meta:
-        def __init__(self):
-            self.model = BlogPost
-            self.fields = ['category', 'tag', 'title', 'snippet', 'text']
+        model = BlogPost
+        fields = ['category', 'tag', 'title', 'snippet', 'text']
 
-            self.widgets = {
-                'category': forms.Select(choices=get_choise_list(), attrs={'class': 'form-control'}),
-                'tag': forms.TextInput(attrs={'class': 'form-control'}),
-                'title': forms.TextInput(attrs={'class': 'form-control'}),  # form-control is a css class
-                'snippet': forms.Textarea(attrs={'class': 'form-control'}),
-                'text': forms.Textarea(attrs={'class': 'form-control'}),
-            }
+        widgets = {
+            'category': forms.Select(choices=get_choise_list(), attrs={'class': 'form-control'}),
+            'tag': forms.TextInput(attrs={'class': 'form-control'}),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),  # form-control is a css class
+            'snippet': forms.Textarea(attrs={'class': 'form-control'}),
+            'text': forms.Textarea(attrs={'class': 'form-control'}),
+        }
+
+        # def __init__(self):
+        #     self.model = BlogPost
+        #     self.fields = ['category', 'tag', 'title', 'snippet', 'text']
+        #
+        #     self.widgets = {
+        #         'category': forms.Select(choices=get_choise_list(), attrs={'class': 'form-control'}),
+        #         'tag': forms.TextInput(attrs={'class': 'form-control'}),
+        #         'title': forms.TextInput(attrs={'class': 'form-control'}),  # form-control is a css class
+        #         'snippet': forms.Textarea(attrs={'class': 'form-control'}),
+        #         'text': forms.Textarea(attrs={'class': 'form-control'}),
+        #     }
 
 
 class AddCategoryForm(forms.ModelForm):
     class Meta:
-        def __init__(self):
-            self.model = Category
-            self.fields = ['name']
+        model = Category
+        fields = ['name']
 
-            self.widgets = {
-                'name': forms.TextInput(attrs={'class': 'form-control'})
-            }
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'})
+        }
+
+        # def __init__(self):
+        #     self.model = Category
+        #     self.fields = ['name']
+        #
+        #     self.widgets = {
+        #         'name': forms.TextInput(attrs={'class': 'form-control'})
+        #     }
