@@ -99,7 +99,7 @@ class SortTagView(generic.ListView):
 
 
 def like(request, post_id):
-    post = get_object_or_404(BlogPost, pk=request.POST.get('blogpost_id'))
+    post = get_object_or_404(BlogPost, pk=post_id)
     liked = False
     if post.likes.filter(id=request.user.id).exists():
         post.likes.remove(request.user)
@@ -112,7 +112,6 @@ def like(request, post_id):
 
 def delete_comment(request, pk, id):
     comment = get_object_or_404(Comment, id=id)
-    # post_id = request.POST['blogpost_id']
     try:
         comment.delete()
         messages.success(request, 'You successfully deleted the comment')
