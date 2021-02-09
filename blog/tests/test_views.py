@@ -1,8 +1,8 @@
-from django.test import TestCase, Client, RequestFactory
+from django.test import TestCase, Client, RequestFactory, override_settings
 from django.urls import reverse
 from blog.models import BlogPost, Category, UserProfile
 from django.contrib.auth.models import User
-# from blog.views import like
+import json
 
 
 class IndexViewTest(TestCase):
@@ -129,21 +129,121 @@ class SortTagViewTest(TestCase):
         self.assertIn('tag', response.context)
         self.assertContains(response, f"{self.category.name}")
 
-# TODO: write more tests!!!
-# class LikeTest(TestCase):
-#     def setUp(self):
-#         self.client = Client()
-#         self.user = User.objects.create_user(username='jacob', password='top_secret')
-#         self.category = Category.objects.create(name='cat')
-#         self.post = BlogPost.objects.create(author=self.user, title='test', snippet='test post', text='TestTest',
-#                                             tag='testing_tag', category=self.category)
-#
-#     def test_like(self):
-#         # url = reverse('blog:like_post', kwargs={'post_id': self.post.id})
-#         request = self.client.get('/blog/liked/1', follow=True)
-#         request.user = self.user
-#         pk = self.post.id
-#         response = like(request, pk)
-#         self.assertRedirects(response, '/blog/1', status_code=302,
-#                              target_status_code=200, fetch_redirect_response=True)
-#         # self.assertRedirects(response, reverse('blog:detail', kwargs={'post_id': self.post.id}))
+
+@override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage')
+class AddPostViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.category = Category.objects.create(name='cat')
+        self.user = User.objects.create(username='BoB', first_name='Bob', last_name='Adams') #, password='okt1267345')
+        self.user.set_password('okt1267345')
+        self.user.save()
+
+    def test_add_post(self):
+        logged_in = self.client.login(username='BoB', password='okt1267345')
+        self.assertTrue(logged_in)
+        data = {
+            'author': self.user.id,
+            'category': self.category,
+            'tag': 'some tag',
+            'title': 'new post',
+            'snippet': 'snippet',
+            'text': 'some text'
+        }
+        response = self.client.post('/blog/addpost/', data, follow=False, secure=True)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(BlogPost.objects.all().count(), 1)
+        post = BlogPost.objects.get(author=self.user)
+        self.assertEqual(post.title, 'new post')
+
+    def test_add_no_post(self):
+        logged_in = self.client.login(username='BoB', password='okt1267345')
+        self.assertTrue(logged_in)
+        data = {}
+        response = self.client.post('/blog/addpost/', data, follow=False, secure=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(BlogPost.objects.all().count(), 0)
+
+
+@override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage')
+class UpdatePostViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.category = Category.objects.create(name='cat')
+        self.user = User.objects.create(username='BoB', first_name='Bob', last_name='Adams')
+        self.user.set_password('okt1267345')
+        self.user.save()
+        self.post = BlogPost(author=self.user, category=self.category, tag='some tag', title='new post',
+                             snippet='snippet', text='some text')
+        self.post.save()
+
+    def test_update_post(self):
+        logged_in = self.client.login(username='BoB', password='okt1267345')
+        self.assertTrue(logged_in)
+        cat = Category.objects.create(name='new')
+        id = self.post.pk
+        data = {
+            'category': cat,
+            'tag': 'new tag',
+            'title': 'new title',
+            'snippet': 'new snippet',
+            'text': 'new text'
+        }
+        response = self.client.post(f'/blog/{id}/update/', data, follow=False, secure=True)
+
+        # f = open("/tmp/index.html", 'wb')
+        # f.write(response.content)
+        # f.close()
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(BlogPost.objects.all().count(), 1)
+        post = BlogPost.objects.get(author=self.user)
+        self.assertEqual(post.title, 'new title')
+
+    def test_no_update_post(self):
+        logged_in = self.client.login(username='BoB', password='okt1267345')
+        self.assertTrue(logged_in)
+        cat = Category.objects.create(name='new')
+        id = self.post.pk
+        data = {}
+        response = self.client.post(f'/blog/{id}/update/', data, follow=False, secure=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(BlogPost.objects.all().count(), 1)
+        post = BlogPost.objects.get(author=self.user)
+        self.assertEqual(post.title, 'new post')
+
+
+@override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage')
+class AddCategoryViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create(username='BoB', first_name='Bob', last_name='Adams')
+        self.user.set_password('okt1267345')
+        self.user.save()
+
+    def test_add_category(self):
+        logged_in = self.client.login(username='BoB', password='okt1267345')
+        self.assertTrue(logged_in)
+        data = {'name': 'cats'}
+        response = self.client.post('/blog/addcategory/', data, follow=False, secure=True)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Category.objects.all().count(), 1)
+        category = Category.objects.get(id=1)
+        self.assertEqual(category.name, 'cats')
+
+    def test_add_no_category(self):
+        logged_in = self.client.login(username='BoB', password='okt1267345')
+        self.assertTrue(logged_in)
+        data = {}
+        response = self.client.post('/blog/addcategory/', data, follow=False, secure=True)
+        print(response.status_code)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(BlogPost.objects.all().count(), 0)
+
+
+
+
+

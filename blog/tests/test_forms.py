@@ -28,7 +28,7 @@ class AddBlogPostFormTest(TestCase):
                                         password='okt1267345')
         form_data = {'author': user, 'tag': 'some tag', 'title': 'title', 'snippet': 'snippet', 'text': 'text'}
         form = BlogPostForm(data=form_data)
-        self.assertTrue(form.is_valid())
+        self.assertFalse(form.is_valid())
 
     def test_form_with_empty_tag_field(self):
         user = User.objects.create(username='anuta', first_name='Anna', last_name='Grigoreva',
@@ -74,7 +74,7 @@ class UpdateBlogPostFormTest(TestCase):
         form_data = {'tag': 'new tag', 'title': 'new title', 'snippet': 'new snippet',
                      'text': 'new text'}
         form = UpdateBlogPostForm(data=form_data)
-        self.assertTrue(form.is_valid())
+        self.assertFalse(form.is_valid())
 
     def test_form_with_empty_tag_field_filled(self):
         category = Category.objects.create(name='cat')
