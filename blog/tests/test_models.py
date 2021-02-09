@@ -1,5 +1,5 @@
 from django.test import TestCase
-from blog.models import BlogPost, Category, UserProfile
+from blog.models import BlogPost, Category, UserProfile, Comment
 from django.contrib.auth.models import User
 
 
@@ -159,3 +159,38 @@ class UserProfileTest(TestCase):
         profile = UserProfile.objects.get(id=1)
         expected = f"{self.profile.user.username}|{self.profile.bio}"
         self.assertEquals(expected, str(profile))
+
+
+class CommentTest(TestCase):
+    def setUp(self):
+        self.category = Category.objects.create(name='cat')
+        self.user = User.objects.create(username='BoB', first_name='Bob', last_name='Adams', password='okt1267345')
+        self.post = BlogPost.objects.create(author=self.user, title='test', snippet='test post', text='TestTest',
+                                        tag='testing', category=self.category)
+        self.comment = Comment(blogpost=self.post, author=self.user, body='my comment')
+        self.comment.save()
+
+    def test_author_label(self):
+        comm = Comment.objects.get(id=1)
+        field_label = comm._meta.get_field('author').verbose_name
+        self.assertEquals(field_label, 'author')
+
+    def test_blogpost_label(self):
+        comm = Comment.objects.get(id=1)
+        field_label = comm._meta.get_field('blogpost').verbose_name
+        self.assertEquals(field_label, 'blogpost')
+
+    def test_body_label(self):
+        comm = Comment.objects.get(id=1)
+        field_label = comm._meta.get_field('body').verbose_name
+        self.assertEquals(field_label, 'body')
+
+    def test_body_length(self):
+        comm = Comment.objects.get(id=1)
+        max_length = comm._meta.get_field('body').max_length
+        self.assertEquals(max_length, 500)
+
+    def test_str(self):
+        comm = Comment.objects.get(id=1)
+        expected = f"{self.comment.author.username}|{self.comment.blogpost.title}|{self.comment.body}"
+        self.assertEquals(expected, str(comm))

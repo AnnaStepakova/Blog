@@ -1,6 +1,6 @@
 from django.test import TestCase, Client, RequestFactory, override_settings
 from django.urls import reverse
-from blog.models import BlogPost, Category, UserProfile
+from blog.models import BlogPost, Category, UserProfile, Comment
 from django.contrib.auth.models import User
 import json
 
@@ -49,15 +49,23 @@ class CategoryAllViewTest(TestCase):
         self.assertContains(response, "No categories available")
 
 
+@override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage')
 class BlogpostDetailViewTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.category = Category.objects.create(name='cat')
-        self.user = User.objects.create(username='BoB', first_name='Bob', last_name='Adams', password='okt1267345')
+        self.user = User.objects.create(username='BoB', first_name='Bob', last_name='Adams')
+        self.user.set_password('okt1267345')
+        self.user.save()
         self.profile = UserProfile.objects.create(user=self.user, bio='biobio')
         self.post = BlogPost.objects.create(author=self.user, title='test', snippet='test post', text='TestTest',
                                        tag='testing', category=self.category)
+        self.comment = Comment.objects.create(blogpost=self.post, author=self.user, body='new comment')
         self.response = self.client.get(reverse('blog:detail', kwargs={'pk': self.post.pk}))
+
+        # f = open("/tmp/index.html", 'wb')
+        # f.write(self.response.content)
+        # f.close()
 
     def test_detail_view(self):
         self.assertEqual(self.response.status_code, 200)
@@ -68,13 +76,33 @@ class BlogpostDetailViewTest(TestCase):
         self.assertTemplateUsed(self.response, 'blog/detail.html')
         self.assertIn('liked', self.response.context)
 
-    def test_post_context(self):
+    def test_post_context_text(self):
         self.assertEqual(self.response.status_code, 200)
         self.assertTemplateUsed(self.response, 'blog/detail.html')
         self.assertContains(self.response, f"{self.user.first_name} {self.user.last_name}")
         self.assertContains(self.response, f"{self.post.title}")
         self.assertContains(self.response, f"{self.post.text}")
         self.assertContains(self.response, f"{self.post.tag}")
+
+    def test_context_params(self):
+        self.assertEqual(self.response.status_code, 200)
+        self.assertTemplateUsed(self.response, 'blog/detail.html')
+        self.assertEqual(self.response.context['comments'].count(), 1)
+        self.assertQuerysetEqual(self.response.context['comments'], map(repr, [self.comment]))
+        self.assertEqual(self.response.context['liked'], False)
+
+    def test_context_comment_form(self):
+        logged_in = self.client.login(username='BoB', password='okt1267345')
+        self.assertTrue(logged_in)
+
+        self.assertEqual(self.response.status_code, 200)
+        self.assertTemplateUsed(self.response, 'blog/detail.html')
+
+        response = self.client.post('/blog/1/', {'body': 'my new comment'}, follow=False, secure=True)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Comment.objects.all().count(), 2)
+        comm = Comment.objects.get(id=2)
+        self.assertEqual(comm.body, 'my new comment')
 
 
 class CategoryDetailViewTest(TestCase):
@@ -215,6 +243,37 @@ class UpdatePostViewTest(TestCase):
 
 
 @override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage')
+class DeletePostViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.category = Category.objects.create(name='cat')
+        self.user = User.objects.create(username='BoB', first_name='Bob', last_name='Adams')
+        self.user.set_password('okt1267345')
+        self.user.save()
+        self.post = BlogPost(author=self.user, category=self.category, tag='some tag', title='new post',
+                             snippet='snippet', text='some text')
+        self.post.save()
+
+    def test_delete_post(self):
+        logged_in = self.client.login(username='BoB', password='okt1267345')
+        self.assertTrue(logged_in)
+        id = self.post.pk
+
+        response = self.client.post(f'/blog/{id}/delete/', follow=True, secure=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(BlogPost.objects.all().count(), 0)
+
+    def test_delete_post2(self):
+        logged_in = self.client.login(username='BoB', password='okt1267345')
+        self.assertTrue(logged_in)
+        id = self.post.pk
+        response = self.client.post(f'/blog/{id}/delete/', follow=False, secure=True)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(BlogPost.objects.all().count(), 0)
+
+
+
+@override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage')
 class AddCategoryViewTest(TestCase):
     def setUp(self):
         self.client = Client()
@@ -243,6 +302,58 @@ class AddCategoryViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(BlogPost.objects.all().count(), 0)
 
+
+@override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage')
+class DeleteCommentTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.category = Category.objects.create(name='cat')
+        self.user = User.objects.create(username='BoB', first_name='Bob', last_name='Adams')
+        self.user.set_password('okt1267345')
+        self.user.save()
+        self.post = BlogPost(author=self.user, category=self.category, tag='some tag', title='new post',
+                             snippet='snippet', text='some text')
+        self.post.save()
+        self.comment = Comment.objects.create(blogpost=self.post, author=self.user, body='new comment')
+
+    def test_delete_comment(self):
+        logged_in = self.client.login(username='BoB', password='okt1267345')
+        self.assertTrue(logged_in)
+        response = self.client.get(reverse('blog:detail', kwargs={'pk': self.post.pk}))
+        self.assertEqual(response.status_code, 200)
+
+        f = open("/tmp/index.html", 'wb')
+        f.write(response.content)
+        f.close()
+
+        response = self.client.post('/blog/1/delete_comment/1/', data={'pk': self.post.pk, 'id': self.comment.pk},
+                                    follow=False)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Comment.objects.all().count(), 0)
+
+
+@override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage')
+class LikeTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.category = Category.objects.create(name='cat')
+        self.user = User.objects.create(username='BoB', first_name='Bob', last_name='Adams')
+        self.user.set_password('okt1267345')
+        self.user.save()
+        self.post = BlogPost(author=self.user, category=self.category, tag='some tag', title='new post',
+                             snippet='snippet', text='some text')
+        self.post.save()
+        self.comment = Comment.objects.create(blogpost=self.post, author=self.user, body='new comment')
+        self.logged_in = self.client.login(username='BoB', password='okt1267345')
+        self.assertTrue(self.logged_in)
+
+    def test_like(self):
+        response = self.client.get(reverse('blog:detail', kwargs={'pk': self.post.pk}))
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post('/blog/liked/1/', data={'post_id': self.post.pk}, follow=False)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.post.likes.count(), 1)
 
 
 

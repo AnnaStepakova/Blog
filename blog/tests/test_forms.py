@@ -1,5 +1,5 @@
 from django.test import TestCase
-from blog.forms import BlogPostForm, UpdateBlogPostForm
+from blog.forms import BlogPostForm, UpdateBlogPostForm, AddCategoryForm, CommentForm
 from django.contrib.auth.models import User
 from blog.models import Category
 
@@ -95,4 +95,26 @@ class UpdateBlogPostFormTest(TestCase):
         form_data = {'category': category, 'tag': 'new tag', 'title': 'new title',
                      'text': 'new text'}
         form = UpdateBlogPostForm(data=form_data)
+        self.assertFalse(form.is_valid())
+
+
+class AddCategoryFormTest(TestCase):
+    def test_form_with_all_fields_filled(self):
+        form_data = {'name': 'cats'}
+        form = AddCategoryForm(data=form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_form_with_empty_fields(self):
+        form = AddCategoryForm(data={})
+        self.assertFalse(form.is_valid())
+
+
+class CommentFormTest(TestCase):
+    def test_form_with_all_fields_filled(self):
+        form_data = {'body': 'new comment'}
+        form = CommentForm(data=form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_form_with_empty_fields(self):
+        form = AddCategoryForm(data={})
         self.assertFalse(form.is_valid())
