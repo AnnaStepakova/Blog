@@ -184,12 +184,18 @@ class AddPostViewTest(TestCase):
         post = BlogPost.objects.get(author=self.user)
         self.assertEqual(post.title, 'new post')
 
+        response2 = self.client.post('/blog/addpost/', data, follow=True, secure=True)
+        self.assertEqual(response2.status_code, 200)
+        self.assertTemplateUsed(response2, 'blog/index.html')
+        self.assertEqual(BlogPost.objects.all().count(), 2)
+
     def test_add_no_post(self):
         logged_in = self.client.login(username='BoB', password='okt1267345')
         self.assertTrue(logged_in)
         data = {}
         response = self.client.post('/blog/addpost/', data, follow=False, secure=True)
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'blog/add_blogpost.html')
         self.assertEqual(BlogPost.objects.all().count(), 0)
 
 
@@ -219,14 +225,14 @@ class UpdatePostViewTest(TestCase):
         }
         response = self.client.post(f'/blog/{id}/update/', data, follow=False, secure=True)
 
-        # f = open("/tmp/index.html", 'wb')
-        # f.write(response.content)
-        # f.close()
-
         self.assertEqual(response.status_code, 302)
         self.assertEqual(BlogPost.objects.all().count(), 1)
         post = BlogPost.objects.get(author=self.user)
         self.assertEqual(post.title, 'new title')
+
+        response = self.client.post(f'/blog/{id}/update/', data, follow=True, secure=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'blog/index.html')
 
     def test_no_update_post(self):
         logged_in = self.client.login(username='BoB', password='okt1267345')
@@ -235,8 +241,8 @@ class UpdatePostViewTest(TestCase):
         id = self.post.pk
         data = {}
         response = self.client.post(f'/blog/{id}/update/', data, follow=False, secure=True)
-
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'blog/update_blogpost.html')
         self.assertEqual(BlogPost.objects.all().count(), 1)
         post = BlogPost.objects.get(author=self.user)
         self.assertEqual(post.title, 'new post')
@@ -254,23 +260,22 @@ class DeletePostViewTest(TestCase):
                              snippet='snippet', text='some text')
         self.post.save()
 
-    def test_delete_post(self):
+    def test_delete_post_result(self):
         logged_in = self.client.login(username='BoB', password='okt1267345')
         self.assertTrue(logged_in)
         id = self.post.pk
-
         response = self.client.post(f'/blog/{id}/delete/', follow=True, secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(BlogPost.objects.all().count(), 0)
+        self.assertTemplateUsed(response, 'blog/index.html')
 
-    def test_delete_post2(self):
+    def test_delete_post(self):
         logged_in = self.client.login(username='BoB', password='okt1267345')
         self.assertTrue(logged_in)
         id = self.post.pk
         response = self.client.post(f'/blog/{id}/delete/', follow=False, secure=True)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(BlogPost.objects.all().count(), 0)
-
 
 
 @override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage')
@@ -286,8 +291,18 @@ class AddCategoryViewTest(TestCase):
         self.assertTrue(logged_in)
         data = {'name': 'cats'}
         response = self.client.post('/blog/addcategory/', data, follow=False, secure=True)
-
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(Category.objects.all().count(), 1)
+        category = Category.objects.get(id=1)
+        self.assertEqual(category.name, 'cats')
+
+    def test_add_category_result(self):
+        logged_in = self.client.login(username='BoB', password='okt1267345')
+        self.assertTrue(logged_in)
+        data = {'name': 'cats'}
+        response = self.client.post('/blog/addcategory/', data, follow=True, secure=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'blog/index.html')
         self.assertEqual(Category.objects.all().count(), 1)
         category = Category.objects.get(id=1)
         self.assertEqual(category.name, 'cats')
@@ -297,9 +312,8 @@ class AddCategoryViewTest(TestCase):
         self.assertTrue(logged_in)
         data = {}
         response = self.client.post('/blog/addcategory/', data, follow=False, secure=True)
-        print(response.status_code)
-
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'blog/add_category.html')
         self.assertEqual(BlogPost.objects.all().count(), 0)
 
 
@@ -315,20 +329,29 @@ class DeleteCommentTest(TestCase):
                              snippet='snippet', text='some text')
         self.post.save()
         self.comment = Comment.objects.create(blogpost=self.post, author=self.user, body='new comment')
+        self.logged_in = self.client.login(username='BoB', password='okt1267345')
 
     def test_delete_comment(self):
-        logged_in = self.client.login(username='BoB', password='okt1267345')
-        self.assertTrue(logged_in)
+        self.assertTrue(self.logged_in)
         response = self.client.get(reverse('blog:detail', kwargs={'pk': self.post.pk}))
         self.assertEqual(response.status_code, 200)
-
-        f = open("/tmp/index.html", 'wb')
-        f.write(response.content)
-        f.close()
+        self.assertTemplateUsed(response, 'blog/detail.html')
 
         response = self.client.post('/blog/1/delete_comment/1/', data={'pk': self.post.pk, 'id': self.comment.pk},
                                     follow=False)
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(Comment.objects.all().count(), 0)
+
+    def test_delete_comment_check_result_page(self):
+        self.assertTrue(self.logged_in)
+        response = self.client.get(reverse('blog:detail', kwargs={'pk': self.post.pk}))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'blog/detail.html')
+
+        response = self.client.post('/blog/1/delete_comment/1/', data={'pk': self.post.pk, 'id': self.comment.pk},
+                                    follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'blog/detail.html')
         self.assertEqual(Comment.objects.all().count(), 0)
 
 
@@ -346,14 +369,51 @@ class LikeTest(TestCase):
         self.comment = Comment.objects.create(blogpost=self.post, author=self.user, body='new comment')
         self.logged_in = self.client.login(username='BoB', password='okt1267345')
         self.assertTrue(self.logged_in)
+        self.response = self.client.get(reverse('blog:detail', kwargs={'pk': self.post.pk}))
 
     def test_like(self):
-        response = self.client.get(reverse('blog:detail', kwargs={'pk': self.post.pk}))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.response.status_code, 200)
+        self.assertTemplateUsed(self.response, 'blog/detail.html')
 
         response = self.client.post('/blog/liked/1/', data={'post_id': self.post.pk}, follow=False)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(self.post.likes.count(), 1)
+
+    def test_like_result_page(self):
+        self.assertEqual(self.response.status_code, 200)
+        self.assertTemplateUsed(self.response, 'blog/detail.html')
+
+        response = self.client.post('/blog/liked/1/', data={'post_id': self.post.pk}, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'blog/detail.html')
+        self.assertEqual(self.post.likes.count(), 1)
+
+    def test_unlike(self):
+        self.assertEqual(self.response.status_code, 200)
+        self.assertTemplateUsed(self.response, 'blog/detail.html')
+
+        response = self.client.post('/blog/liked/1/', data={'post_id': self.post.pk}, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'blog/detail.html')
+        self.assertEqual(self.post.likes.count(), 1)
+
+        response = self.client.post('/blog/liked/1/', data={'post_id': self.post.pk}, follow=False)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.post.likes.count(), 0)
+
+    def test_unlike_result_page(self):
+        self.assertEqual(self.response.status_code, 200)
+        self.assertTemplateUsed(self.response, 'blog/detail.html')
+
+        response = self.client.post('/blog/liked/1/', data={'post_id': self.post.pk}, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'blog/detail.html')
+        self.assertEqual(self.post.likes.count(), 1)
+
+        response = self.client.post('/blog/liked/1/', data={'post_id': self.post.pk}, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'blog/detail.html')
+        self.assertEqual(self.post.likes.count(), 0)
 
 
 
