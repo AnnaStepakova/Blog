@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     'django_nose',
     'django_comments',
     'mptt',
-    'comments',
+    # 'comments',
 ]
 
 # COMMENTS_APP = 'comments'
