@@ -110,11 +110,12 @@ def like(request, post_id):
     return HttpResponseRedirect(reverse('blog:detail', args=[str(post_id)]))
 
 
-def delete_comment(request, pk, id):
-    comment = get_object_or_404(Comment, id=id)
+def delete_comment(request, pk, ck):
+    comment = get_object_or_404(Comment, id=request.POST.get('comment_id'))
+    pkey = comment.blogpost.id
     try:
         comment.delete()
         messages.success(request, 'You successfully deleted the comment')
     except:
         messages.warning(request, 'The comment could not be deleted.')
-    return HttpResponseRedirect(reverse('blog:detail', args=[str(pk)]))
+    return HttpResponseRedirect(reverse('blog:detail', args=[str(pkey)]))
