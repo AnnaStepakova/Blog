@@ -12,6 +12,7 @@ urlpatterns = [
     path('<int:pk>/update/', views.UpdatePostView.as_view(), name='update_post'),
     path('<int:pk>/delete/', views.DeletePostView.as_view(), name='delete_post'),
     path('<int:pk>/delete_comment/<int:ck>/', views.delete_comment, name='delete_comment'),
+    path('<int:pk>/reply_to_comment/<int:ck>/', views.reply_to_comment, name='reply'),
     path('liked/<int:post_id>/', views.like, name='like_post'),
     path('category/<str:cat>', views.category_view, name='category'),
     path('category/', views.CategoryAllView.as_view(), name='category_all'),

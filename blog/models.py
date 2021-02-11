@@ -54,8 +54,12 @@ class UserProfile(models.Model):
 class Comment(models.Model):
     blogpost = models.ForeignKey(BlogPost, related_name="comments", on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
+    reply = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
     body = models.TextField(max_length=500)
     date_posted = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.author.get_username() + '|' + self.blogpost.title + '|' + self.body
+        result = self.author.get_username() + '|' + self.blogpost.title + '|' + self.body
+        if self.reply:
+            result += ' ( reply to: ' + self.reply.author.username + ')'
+        return result

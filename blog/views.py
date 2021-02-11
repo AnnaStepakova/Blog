@@ -1,4 +1,6 @@
 from django.contrib import messages
+from django.template import RequestContext
+
 from .models import BlogPost, Category, Comment
 from django.views import generic
 from django.shortcuts import get_object_or_404, render
@@ -38,7 +40,7 @@ class DetailView(generic.DetailView):
             blogpost=self.get_object()).order_by('-date_posted')
         data['comments'] = comments_connected
         if self.request.user.is_authenticated:
-            data['comment_form'] = CommentForm(instance=self.request.user)
+            data['form'] = CommentForm(instance=self.request.user)
         return data
 
     def post(self, request, *args, **kwargs):
@@ -119,3 +121,23 @@ def delete_comment(request, pk, ck):
     except:
         messages.warning(request, 'The comment could not be deleted.')
     return HttpResponseRedirect(reverse('blog:detail', args=[str(pkey)]))
+
+
+def reply_to_comment(request, pk, ck):
+    if request.method == 'POST':
+        reply_form = CommentForm(data=request.POST)
+        if reply_form.is_valid():
+            parent_id = int(request.POST.get('comment_id'))
+            parent_obj = Comment.objects.get(id=parent_id)
+            reply_comment = reply_form.save(commit=False)
+            reply_comment.author = request.user
+            reply_comment.reply = parent_obj
+            reply_comment = reply_form.save(commit=False)
+            reply_comment.blogpost = parent_obj.blogpost
+            reply_comment.save()
+    else:
+        reply_form = CommentForm()
+    return HttpResponseRedirect(reverse('blog:detail', args=[str(pk)]))
+
+
+

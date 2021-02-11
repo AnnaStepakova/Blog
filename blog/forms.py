@@ -47,8 +47,15 @@ class AddCategoryForm(forms.ModelForm):
 
 class CommentForm(forms.ModelForm):
 
-    body = forms.CharField(label=False, widget=forms.Textarea(attrs={'class': 'form-control'}))
+    body = forms.CharField(label=False, widget=forms.Textarea(attrs={'class': 'form-control', 'style': 'height:50px'}))
 
     class Meta:
         model = Comment
         fields = ['body']
+
+        widgets = {
+            'author': forms.TextInput(attrs={'class': 'form-control', 'value': '', 'id': 'member', 'type': 'hidden'}),
+        }
+
+
+

@@ -50,7 +50,7 @@
         <p>Leave a comment...</p>
         <form method="post">
             {% csrf_token %}
-            {{ comment_form }}
+            {{ form }}
             <br/>
             <button class="btn btn-secondary btn-sm" type='submit'> Add Comment </button>
         </form>
@@ -65,6 +65,7 @@
     {% if comments %}
         <ul class="list-group">
         {% for comment in comments %}
+            {% if comment.reply == None %}
             <li class="list-group-item">
                 <p><strong>{{ comment.author.get_username }}</strong> | <small>{{ comment.date_posted }}</small> : {{ comment.body|safe }}</p>
                 {% if user.is_authenticated and user.id == comment.author.id%}
@@ -73,10 +74,40 @@
                 <button class="link-primary" type='submit' value="{{ comment.id }}" name="comment_id"> <small>Delete</small> </button>
             </form>
             {% endif %}
+        <br/>
+            {% if user.is_authenticated %}
+             <form action="{% url 'blog:reply' blogpost.id comment.id %}"  method="post">
+                {% csrf_token %}
+                {{ form }}
+                <br/>
+                <button class="btn btn-secondary btn-sm" type='submit' value="{{ comment.id }}" name="comment_id"> Add Reply </button>
+             </form>
+
+                <br/>
+
+            {% endif %}
+            <ul class="list-group">
+             {% for reply in comment.replies.all %}
+                <li class="list-group-item">
+                    <p>(Reply to : {{ comment.author.get_username }}) <strong>{{ reply.author.get_username }}</strong> | <small>{{ reply.date_posted }}</small> : {{ reply.body|safe }}</p>
+                    {% if user.is_authenticated and user.id == reply.author.id%}
+            <form action="{% url 'blog:delete_comment' blogpost.id comment.id %}" method="post" >
+                {% csrf_token %}
+                <button class="link-primary" type='submit' value="{{ reply.id }}" name="comment_id"> <small>Delete</small> </button>
+            </form>
+            {% endif %}
+                </li>
+            {% endfor %}
+            </ul>
             </li>
+                {% endif %}
         {% endfor %}
         </ul>
     {% endif %}
+
+
+    <br/><br/>
+
 
     <br/><br/>
 <a class="btn btn-secondary btn-sm" href="{% url 'blog:index' %}" role="button">Back</a>

@@ -47,12 +47,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.sites',
+    # 'django.contrib.sites',
     'crispy_forms',
     'ckeditor',
     'django_nose',
-    'django_comments',
-    'mptt',
+    # 'django_comments',
+    # 'mptt',
     # 'comments',
 ]
 
