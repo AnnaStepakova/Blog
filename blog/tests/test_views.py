@@ -336,6 +336,7 @@ class DeleteCommentTest(TestCase):
         response = self.client.get(reverse('blog:detail', kwargs={'pk': self.post.pk}))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'blog/detail.html')
+        self.assertEqual(Comment.objects.all().count(), 1)
 
         response = self.client.post('/blog/1/delete_comment/1/', data={'pk': self.post.pk, 'id': self.comment.pk},
                                     follow=False)
