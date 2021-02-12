@@ -89,14 +89,16 @@ class DeletePostView(generic.DeleteView):
 class SortTagView(generic.ListView):
     model = BlogPost
     template_name = 'blog/sort_tag.html'
-    context_object_name = 'post_list'
+    # context_object_name = 'post_list'
+    paginate_by = 5
 
     def get_queryset(self):
         query = self.request.GET.get('tag')
-        return BlogPost.objects.filter(Q(tag__contains=query) | Q(title__contains=query) | Q(author__username=query))
+        object_list = BlogPost.objects.filter(Q(tag__contains=query) | Q(title__contains=query) | Q(author__username=query)).order_by('-pub_date')
+        return object_list
 
     def get_context_data(self, **kwargs):  # allows to pass additional params to the template
-        data = super().get_context_data(**kwargs)
+        data = super(SortTagView, self).get_context_data(**kwargs)
         data['tag'] = self.request.GET.get('tag')
         return data
 
