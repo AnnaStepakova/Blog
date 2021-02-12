@@ -19,6 +19,9 @@
       </li>
     {% endfor %}
 </ul>
+
+ {% include 'blog/pagination.html' %}
+
 {% else %}
     <p>No posts available</p>
 {% endif %}

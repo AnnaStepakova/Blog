@@ -7,22 +7,23 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.urls import reverse_lazy, reverse
 from blog.models import BlogPost, UserProfile
 from .forms import SignUpForm, EditProfileForm, PasswordUpdateForm, EditProfilePageForm, ProfilePageCreateForm
-from . import views
+from django.views.generic.list import MultipleObjectMixin
+from django.core.paginator import Paginator
 
 
-class ProfilePageView(generic.DetailView):
+class ProfilePageView(generic.DetailView, MultipleObjectMixin):
     model = UserProfile
     template_name = 'users/profile.html'
+    paginate_by = 5
 
     def get_context_data(self, **kwargs):
-        data = super(ProfilePageView, self).get_context_data(**kwargs)
         profile = get_object_or_404(UserProfile, id=self.kwargs['pk'])
-        data['userprofile'] = profile
-        posts = BlogPost.objects.filter(author=profile.user)
-        data['post_list'] = posts
+        object_list = BlogPost.objects.filter(author=profile.user).order_by('-pub_date')
         in_subs = False
         if self.request.user.userprofile.subs.filter(id=profile.id).exists():
             in_subs = True
+        data = super(ProfilePageView, self).get_context_data(object_list=object_list, **kwargs)
+        data['userprofile'] = profile
         data['in_subs'] = in_subs
         return data
 
@@ -87,3 +88,23 @@ def follow(request, pk):
     userprofile.save()
     userprofile_to_follow.save()
     return HttpResponseRedirect(reverse('users:profile', args=[str(userprofile_to_follow_id)]))
+
+
+def show_followers(request, pk):
+    profile = get_object_or_404(UserProfile, id=pk)
+    followers = profile.follow.get_queryset()
+    return render(request, 'users/followers.html', {'followers': followers, 'userprofile': profile})
+
+
+def show_subs(request, pk):
+    profile = get_object_or_404(UserProfile, id=pk)
+    subs = profile.subs.get_queryset()
+    post_list = []
+    for sub in subs:
+        post_list += BlogPost.objects.filter(author=sub.user).order_by('-pub_date')
+
+    paginator = Paginator(post_list, 3)
+    page = request.GET.get('page')
+    page_obj = paginator.get_page(page)
+
+    return render(request, 'users/subscriptions.html', {'page_obj': page_obj, 'userprofile': profile})

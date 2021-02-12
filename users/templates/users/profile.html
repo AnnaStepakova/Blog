@@ -31,7 +31,7 @@
           {% endif %}
           </p>
         <p class="card-text">{{ userprofile.bio }}</p>
-
+        <a href="{% url 'users:followers' userprofile.id %}" ><small>Followers</small></a> | <a href="{% url 'users:subs' userprofile.id %}"><small>Subscriptions</small></a>
       </div>
     </div>
   </div>
@@ -50,16 +50,18 @@
             <button class="link-primary" type='submit' name="userprofile_to_follow_id" value="{{ userprofile.id }}">Follow</button>
             </form>
         {% endif %}
-    {% endif %}
-    <br/>
+            <br/>
     <hr>
-    <br/>
+            <br/>
+    {% endif %}
+
+
     <h2>Posts</h2>
     <br/>
 
-    {% if post_list %}
+    {% if object_list %}
 <ul class="list-group">
-    {% for post in post_list %}
+    {% for post in object_list %}
         <li class="list-group-item">
             <strong>{{ post.category }}</strong> |
             <a href="{% url 'blog:detail' post.id %}"> {{ post.title }}</a> | {{ post.author }}
@@ -72,6 +74,9 @@
       </li>
     {% endfor %}
 </ul>
+
+        {% include 'blog/pagination.html' %}
+
 {% else %}
     <p>No posts available</p>
 {% endif %}

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+    {{ userprofile.user.get_username }}`s subs
+{% endblock %}
+{% block content %}
+ <div class="card mb-3" >
+  <div class="row no-gutters">
+    <div class="col-md-2">
+      {% if userprofile.profile_img %}
+    <img src="{{ userprofile.profile_img.url }}" class="card-img" />
+      {% else %}
+          <img src="{% static 'blog/images/def_img.jpg' %}" class="card-img" />
+    {% endif %}
+    </div>
+    <div class="col-md-10">
+      <div class="card-body">
+        <h5 class="card-title">{{ userprofile.user.first_name }} {{ userprofile.user.last_name }} | {{ userprofile.user.get_username }}</h5>
+      </div>
+    </div>
+  </div>
+</div>
+    <br/>
+<hr>
+
+    <br/>
+
+    {% for post in page_obj %}
+        <li class="list-group-item">
+            <strong>{{ post.category }}</strong> |
+            <a href="{% url 'blog:detail' post.id %}"> {{ post.title }}</a> | <a href="{% url 'users:profile' post.author.userprofile.id %}">{{ post.author }}</a>
+        {% if user.is_authenticated and user.id == post.author.id %}
+        <a href="{% url 'blog:update_post' post.id %}" ><small>Edit |</small></a> <a href="{% url 'blog:delete_post' post.id %}" ><small>Delete</small></a>
+        {% endif %}
+        <p>{{ post.snippet }}</p>
+        <br/>
+        <p>{{ post.likes.count }} <img src="https://img.icons8.com/color/48/000000/like--v1.png" width="25" height="25" /></p>
+      </li>
+    {% endfor %}
+
+    {% include 'blog/pagination.html' %}
+
+ <a class="btn btn-secondary btn-sm" href="{% url 'users:profile' user.userprofile.id %}" role="button">Go to my Profile Page</a>
+
+
+
+{% endblock %}

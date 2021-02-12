@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+    {{ userprofile.user.get_username }}`s followers
+{% endblock %}
+{% block content %}
+ <div class="card mb-3" >
+  <div class="row no-gutters">
+    <div class="col-md-2">
+      {% if userprofile.profile_img %}
+    <img src="{{ userprofile.profile_img.url }}" class="card-img" />
+      {% else %}
+          <img src="{% static 'blog/images/def_img.jpg' %}" class="card-img" />
+    {% endif %}
+    </div>
+    <div class="col-md-10">
+      <div class="card-body">
+        <h5 class="card-title">{{ userprofile.user.first_name }} {{ userprofile.user.last_name }} | {{ userprofile.user.get_username }}</h5>
+      </div>
+    </div>
+  </div>
+</div>
+    <br/>
+<hr>
+    {% for follower in followers %}
+        <a href="{% url 'users:profile' follower.id %}" >{{ follower.user.get_username }} </a>
+    {% endfor %}
+
+    <br/>
+    <hr>
+    <br/>
+    <a class="btn btn-secondary btn-sm" href="{% url 'users:profile' user.userprofile.id %}" role="button">Go to my Profile Page</a>
+    <br/>
+
+
+
+{% endblock %}

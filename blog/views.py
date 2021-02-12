@@ -15,6 +15,7 @@ from django.db.models import Count
 class IndexView(generic.ListView):
     template_name = 'blog/index.html'
     context_object_name = 'post_list'
+    paginate_by = 5
 
     def get_queryset(self):
         return BlogPost.objects.all().order_by('-pub_date')

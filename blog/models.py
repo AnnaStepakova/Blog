@@ -45,9 +45,6 @@ class UserProfile(models.Model):
     twitter_link = models.CharField(max_length=255, null=True, blank=True)
     website_link = models.CharField(max_length=255, null=True, blank=True)
 
-    # followers = models.ManyToManyField(User, related_name='followers', blank=True)
-    # subscriptions = models.ManyToManyField(User, related_name='subs', blank=True)
-
     follow = models.ManyToManyField('UserProfile', related_name='users_follow', blank=True)
     subs = models.ManyToManyField('UserProfile', related_name='users_subs', blank=True)
 
