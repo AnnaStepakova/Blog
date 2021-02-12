@@ -1,5 +1,6 @@
 import datetime
 from django.db import models
+from django.template.defaultfilters import register
 from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth.models import User
@@ -44,11 +45,22 @@ class UserProfile(models.Model):
     twitter_link = models.CharField(max_length=255, null=True, blank=True)
     website_link = models.CharField(max_length=255, null=True, blank=True)
 
+    # followers = models.ManyToManyField(User, related_name='followers', blank=True)
+    # subscriptions = models.ManyToManyField(User, related_name='subs', blank=True)
+
+    follow = models.ManyToManyField('UserProfile', related_name='users_follow', blank=True)
+    subs = models.ManyToManyField('UserProfile', related_name='users_subs', blank=True)
+
     def __str__(self):
         return self.user.get_username() + '|' + self.bio
 
     def get_absolute_url(self):
         return reverse('blog:index')
+
+    # @register.filter
+    # def if_following(self, user_id):
+    #     return self.subscriptions.filter(id=user_id).exists()
+
 
 
 class Comment(models.Model):

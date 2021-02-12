@@ -9,7 +9,7 @@
     {% for post in post_list %}
         <li class="list-group-item">
             <strong>{{ post.category }}</strong> |
-            <a href="{% url 'blog:detail' post.id %}"> {{ post.title }}</a> | {{ post.author }}
+            <a href="{% url 'blog:detail' post.id %}"> {{ post.title }}</a> | <a href="{% url 'users:profile' post.author.userprofile.id %}">{{ post.author }}</a>
         {% if user.is_authenticated and user.id == post.author.id %}
         <a href="{% url 'blog:update_post' post.id %}" ><small>Edit |</small></a> <a href="{% url 'blog:delete_post' post.id %}" ><small>Delete</small></a>
         {% endif %}

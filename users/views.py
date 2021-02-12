@@ -1,10 +1,11 @@
-from django.http import HttpResponse
+from django.contrib.auth.models import User
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.views import generic
 from django.contrib.auth.views import PasswordChangeView
 from django.contrib.auth.forms import PasswordChangeForm
-from django.urls import reverse_lazy
-from blog.models import UserProfile, BlogPost
+from django.urls import reverse_lazy, reverse
+from blog.models import BlogPost, UserProfile
 from .forms import SignUpForm, EditProfileForm, PasswordUpdateForm, EditProfilePageForm, ProfilePageCreateForm
 from . import views
 
@@ -17,8 +18,12 @@ class ProfilePageView(generic.DetailView):
         data = super(ProfilePageView, self).get_context_data(**kwargs)
         profile = get_object_or_404(UserProfile, id=self.kwargs['pk'])
         data['userprofile'] = profile
-        posts = BlogPost.objects.filter(author=self.request.user)
+        posts = BlogPost.objects.filter(author=profile.user)
         data['post_list'] = posts
+        in_subs = False
+        if self.request.user.userprofile.subs.filter(id=profile.id).exists():
+            in_subs = True
+        data['in_subs'] = in_subs
         return data
 
 
@@ -66,3 +71,19 @@ class PasswordUpdateView(PasswordChangeView):
 
 def password_success(request):
     return render(request, 'users/password_success.html', {})
+
+
+def follow(request, pk):
+    user = request.user
+    userprofile = get_object_or_404(UserProfile, id=user.userprofile.id)
+    userprofile_to_follow_id = request.POST.get('userprofile_to_follow_id')
+    userprofile_to_follow = get_object_or_404(UserProfile, id=userprofile_to_follow_id)
+    if userprofile.subs.filter(id=userprofile_to_follow_id).exists():
+        userprofile.subs.remove(userprofile_to_follow)
+        userprofile_to_follow.follow.remove(userprofile)
+    else:
+        userprofile.subs.add(userprofile_to_follow)
+        userprofile_to_follow.follow.add(userprofile)
+    userprofile.save()
+    userprofile_to_follow.save()
+    return HttpResponseRedirect(reverse('users:profile', args=[str(userprofile_to_follow_id)]))

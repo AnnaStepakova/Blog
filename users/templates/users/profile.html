@@ -31,10 +31,26 @@
           {% endif %}
           </p>
         <p class="card-text">{{ userprofile.bio }}</p>
+
       </div>
     </div>
   </div>
 </div>
+    <br/>
+
+    {% if user.is_authenticated  and user != userprofile.user %}
+        {% if in_subs %}
+            <form action="{% url 'users:follow' userprofile.id %}" method="post" >
+            {% csrf_token %}
+             <button class="link-primary" type='submit' name="userprofile_to_follow_id" value="{{ userprofile.id }}">Unfollow</button>
+            </form>
+        {% else %}
+            <form action="{% url 'users:follow' userprofile.id %}" method="post" >
+                {% csrf_token %}
+            <button class="link-primary" type='submit' name="userprofile_to_follow_id" value="{{ userprofile.id }}">Follow</button>
+            </form>
+        {% endif %}
+    {% endif %}
     <br/>
     <hr>
     <br/>

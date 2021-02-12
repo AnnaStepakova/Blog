@@ -9,5 +9,6 @@ urlpatterns = [
     path('pass_change_success/', views.password_success, name='pass_succ'),
     path('profile/<int:pk>/', views.ProfilePageView.as_view(), name='profile'),
     path('edit_profile/<int:pk>/', views.EditProfilePageView.as_view(), name='edit_profile'),
-    path('create_profile/', views.CreateProfilePageView.as_view(), name='create_profile')
+    path('create_profile/', views.CreateProfilePageView.as_view(), name='create_profile'),
+    path('profile/<int:pk>/follow/', views.follow, name='follow'),
 ]
