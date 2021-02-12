@@ -1,8 +1,5 @@
-import datetime
 from django.db import models
-from django.template.defaultfilters import register
 from django.urls import reverse
-from django.utils import timezone
 from django.contrib.auth.models import User
 from ckeditor.fields import RichTextField
 
@@ -53,11 +50,6 @@ class UserProfile(models.Model):
 
     def get_absolute_url(self):
         return reverse('blog:index')
-
-    # @register.filter
-    # def if_following(self, user_id):
-    #     return self.subscriptions.filter(id=user_id).exists()
-
 
 
 class Comment(models.Model):
