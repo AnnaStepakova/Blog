@@ -31,7 +31,11 @@
           {% endif %}
           </p>
         <p class="card-text">{{ userprofile.bio }}</p>
-        <a href="{% url 'users:followers' userprofile.id %}" ><small>Followers</small></a> | <a href="{% url 'users:subs' userprofile.id %}"><small>Subscriptions</small></a>
+        <a href="{% url 'users:followers' userprofile.id %}" ><small>Followers</small></a> |
+        <a href="{% url 'users:subs' userprofile.id %}"><small>Subscriptions</small></a>
+      {% if user.is_authenticated  and user == userprofile.user %}
+        | <a href="{% url 'users:feed' userprofile.id %}">Feed</a>
+      {% endif %}
       </div>
     </div>
   </div>

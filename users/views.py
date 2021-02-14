@@ -99,6 +99,12 @@ def show_followers(request, pk):
 def show_subs(request, pk):
     profile = get_object_or_404(UserProfile, id=pk)
     subs = profile.subs.get_queryset()
+    return render(request, 'users/subs.html', {'subs': subs, 'userprofile': profile})
+
+
+def show_feed(request, pk):
+    profile = get_object_or_404(UserProfile, id=pk)
+    subs = profile.subs.get_queryset()
     post_list = []
     for sub in subs:
         post_list += BlogPost.objects.filter(author=sub.user).order_by('-pub_date')
@@ -107,4 +113,4 @@ def show_subs(request, pk):
     page = request.GET.get('page')
     page_obj = paginator.get_page(page)
 
-    return render(request, 'users/subscriptions.html', {'page_obj': page_obj, 'userprofile': profile})
+    return render(request, 'users/feed.html', {'page_obj': page_obj, 'userprofile': profile})

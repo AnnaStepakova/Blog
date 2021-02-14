@@ -21,10 +21,10 @@
   </div>
 </div>
     <br/>
-<hr>
-
     <br/>
-
+    <h4>My feed:</h4>
+    <br/>
+{% if page_obj %}
     {% for post in page_obj %}
         <li class="list-group-item">
             <strong>{{ post.category }}</strong> |
@@ -39,6 +39,10 @@
     {% endfor %}
 
     {% include 'blog/pagination.html' %}
+    {% else %}
+    <p>No posts are available</p>
+    <br/>
+    {% endif %}
 
  <a class="btn btn-secondary btn-sm" href="{% url 'users:profile' user.userprofile.id %}" role="button">Go to my Profile Page</a>
 

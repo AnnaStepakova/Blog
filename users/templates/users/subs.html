@@ -21,10 +21,10 @@
   </div>
 </div>
     <br/>
-    <h4>My followers:</h4>
+    <h4>My subscriptions:</h4>
     <br/>
-    {% for follower in followers %}
-        <a href="{% url 'users:profile' follower.id %}" >{{ follower.user.get_username }} </a> <br/>
+    {% for sub in subs %}
+        <a href="{% url 'users:profile' sub.id %}" >{{ sub.user.get_username }} </a> <br/>
     {% endfor %}
 
     <br/>
