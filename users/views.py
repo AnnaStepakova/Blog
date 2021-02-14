@@ -20,11 +20,19 @@ class ProfilePageView(generic.DetailView, MultipleObjectMixin):
         profile = get_object_or_404(UserProfile, id=self.kwargs['pk'])
         object_list = BlogPost.objects.filter(author=profile.user).order_by('-pub_date')
         in_subs = False
-        if self.request.user.userprofile.subs.filter(id=profile.id).exists():
-            in_subs = True
+        my_profile_exists = False
+        try:
+            my_profile = get_object_or_404(UserProfile, user=self.request.user)
+            my_profile_exists = True
+        except:
+            my_profile_exists = False
+        if my_profile_exists:
+            if self.request.user.userprofile.subs.filter(id=profile.id).exists():
+                in_subs = True
         data = super(ProfilePageView, self).get_context_data(object_list=object_list, **kwargs)
         data['userprofile'] = profile
         data['in_subs'] = in_subs
+        data['my_profile_exists'] = my_profile_exists
         return data
 
 

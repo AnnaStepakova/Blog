@@ -10,8 +10,8 @@
         <li class="list-group-item">
             <strong>{{ post.category }}</strong> |
             <a href="{% url 'blog:detail' post.id %}"> {{ post.title }}</a> |
-         {% if blogpost.author.userprofile %}
-    By: <a href="{% url 'users:profile' post.author.userprofile.id %}" >{{ post.author.get_username }} </a>
+         {% if post.author.userprofile %}
+    <a href="{% url 'users:profile' post.author.userprofile.id %}" >{{ post.author.get_username }} </a>
     {% else %}
     <a>{{ post.author.get_username }} </a>
     {% endif %}
