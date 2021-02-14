@@ -27,7 +27,7 @@ class ProfilePageViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'users/profile.html')
         self.assertContains(response, "No posts available")
-        self.assertQuerysetEqual(response.context['post_list'], [])
+        self.assertQuerysetEqual(response.context['object_list'], [])
         self.assertEqual(response.context['userprofile'], self.profile)
 
 

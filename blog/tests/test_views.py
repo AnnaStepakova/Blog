@@ -15,7 +15,7 @@ class IndexViewTest(TestCase):
         category = Category.objects.get(id=1)
         user = User.objects.get(id=1)
         post = BlogPost.objects.create(author=user, title='test1', snippet='test post1', text='TestTest1',
-                                             tag='testing1', category=category)
+                                       tag='testing1', category=category)
         response = self.client.get(reverse('blog:index'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'blog/index.html')
@@ -59,7 +59,7 @@ class BlogpostDetailViewTest(TestCase):
         self.user.save()
         self.profile = UserProfile.objects.create(user=self.user, bio='biobio')
         self.post = BlogPost.objects.create(author=self.user, title='test', snippet='test post', text='TestTest',
-                                       tag='testing', category=self.category)
+                                            tag='testing', category=self.category)
         self.comment = Comment.objects.create(blogpost=self.post, author=self.user, body='new comment')
         self.response = self.client.get(reverse('blog:detail', kwargs={'pk': self.post.pk}))
 
@@ -131,7 +131,7 @@ class CategoryDetailViewTest(TestCase):
 class SortTagViewTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create_user(username='jacob',  password='top_secret')
+        self.user = User.objects.create_user(username='jacob', password='top_secret')
         self.category = Category.objects.create(name='cat')
         self.post = BlogPost.objects.create(author=self.user, title='test', snippet='test post', text='TestTest',
                                             tag='testing_tag', category=self.category)
@@ -163,7 +163,7 @@ class AddPostViewTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.category = Category.objects.create(name='cat')
-        self.user = User.objects.create(username='BoB', first_name='Bob', last_name='Adams') #, password='okt1267345')
+        self.user = User.objects.create(username='BoB', first_name='Bob', last_name='Adams')  # , password='okt1267345')
         self.user.set_password('okt1267345')
         self.user.save()
 
@@ -338,8 +338,13 @@ class DeleteCommentTest(TestCase):
         self.assertTemplateUsed(response, 'blog/detail.html')
         self.assertEqual(Comment.objects.all().count(), 1)
 
-        response = self.client.post('/blog/1/delete_comment/1/', data={'pk': self.post.pk, 'id': self.comment.pk},
-                                    follow=False)
+        response = self.client.post(reverse('blog:delete_comment', kwargs={'pk': self.post.pk, 'ck': self.comment.pk}),
+                                    data={'comment_id': self.comment.pk}, follow=False)
+
+        f = open("/tmp/index.html", 'wb')
+        f.write(response.content)
+        f.close()
+
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Comment.objects.all().count(), 0)
 
@@ -349,8 +354,8 @@ class DeleteCommentTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'blog/detail.html')
 
-        response = self.client.post('/blog/1/delete_comment/1/', data={'pk': self.post.pk, 'id': self.comment.pk},
-                                    follow=True)
+        response = self.client.post(reverse('blog:delete_comment', kwargs={'pk': self.post.pk, 'ck': self.comment.pk}),
+                                    data={'comment_id': self.comment.pk}, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'blog/detail.html')
         self.assertEqual(Comment.objects.all().count(), 0)
@@ -415,7 +420,3 @@ class LikeTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'blog/detail.html')
         self.assertEqual(self.post.likes.count(), 0)
-
-
-
-
