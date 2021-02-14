@@ -1,7 +1,8 @@
 from django.test import TestCase, Client, RequestFactory, override_settings
 from django.urls import reverse
-from blog.models import UserProfile
+from blog.models import UserProfile, BlogPost, Category
 from django.contrib.auth.models import User
+from users.views import follow
 
 
 @override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage')
@@ -210,4 +211,102 @@ class PasswordSuccessTest(TestCase):
         response = self.client.get(reverse('users:pass_succ'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'users/password_success.html')
+
+
+@override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage')
+class FollowTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.factory = RequestFactory()
+
+        self.user1 = User.objects.create(username='BoB1', first_name='Bob', last_name='Adams', email='bob@bob.com')
+        self.user1.set_password('okt1267345')
+        self.user1.save()
+        self.logged_in1 = self.client.login(username='BoB1', password='okt1267345')
+        self.profile1 = UserProfile.objects.create(user=self.user1, bio='BoB1 bio')
+
+        self.user2 = User.objects.create(username='BoB2', first_name='Bob', last_name='Adams', email='bob@bob.com')
+        self.user2.set_password('okt12')
+        self.user2.save()
+        self.logged_in2 = self.client.login(username='BoB2', password='okt12')
+        self.profile2 = UserProfile.objects.create(user=self.user2, bio='BoB2 bio')
+        self.category = Category.objects.create(name='cats')
+        self.post = BlogPost.objects.create(author=self.user1, title='test', snippet='test post', text='TestTest',
+                                            tag='testing', category=self.category)
+        self.request = self.factory.post(reverse('users:profile', kwargs={'pk': self.profile1.pk}),
+                                    {'userprofile_to_follow_id': self.profile1.pk})
+        self.request.user = self.user2
+        self.response = follow(self.request, self.profile1.pk)
+
+    def test_follow(self):
+        self.assertTrue(self.logged_in1)
+        self.assertTrue(self.logged_in2)
+        response = self.client.get(reverse('users:profile', kwargs={'pk': self.profile1.pk}))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse('users:profile', kwargs={'pk': self.profile2.pk}))
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(self.response.status_code, 302)
+        self.assertEqual(self.profile1 in self.profile2.subs.all(), True)
+        self.assertEqual(self.profile2 in self.profile1.follow.all(), True)
+
+    def test_unfollow(self):
+        self.assertTrue(self.logged_in1)
+        self.assertTrue(self.logged_in2)
+        response = self.client.get(reverse('users:profile', kwargs={'pk': self.profile1.pk}))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse('users:profile', kwargs={'pk': self.profile2.pk}))
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(self.response.status_code, 302)
+        self.assertEqual(self.profile1 in self.profile2.subs.all(), True)
+        self.assertEqual(self.profile2 in self.profile1.follow.all(), True)
+
+        request = self.factory.post(reverse('users:profile', kwargs={'pk': self.profile1.pk}),
+                                    {'userprofile_to_follow_id': self.profile1.pk})
+        request.user = self.user2
+        response = follow(request, self.profile1.pk)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.profile1 in self.profile2.subs.all(), False)
+        self.assertEqual(self.profile2 in self.profile1.follow.all(), False)
+
+    def test_show_followers(self):
+        self.assertTrue(self.logged_in1)
+        self.assertTrue(self.logged_in2)
+        response = self.client.get(reverse('users:profile', kwargs={'pk': self.profile1.pk}))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse('users:profile', kwargs={'pk': self.profile2.pk}))
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(self.response.status_code, 302)
+        self.assertEqual(self.profile1 in self.profile2.subs.all(), True)
+        self.assertEqual(self.profile2 in self.profile1.follow.all(), True)
+
+        response = self.client.get(reverse('users:followers', kwargs={'pk': self.profile1.pk}))
+        self.assertEqual(response.status_code, 200)
+
+        self.assertTemplateUsed(response, 'users/followers.html')
+        self.assertContains(response, f"{self.profile2.user.get_username()}")
+
+    def test_show_feed(self):
+        self.assertTrue(self.logged_in1)
+        self.assertTrue(self.logged_in2)
+        response = self.client.get(reverse('users:profile', kwargs={'pk': self.profile1.pk}))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse('users:profile', kwargs={'pk': self.profile2.pk}))
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(self.response.status_code, 302)
+        self.assertEqual(self.profile1 in self.profile2.subs.all(), True)
+        self.assertEqual(self.profile2 in self.profile1.follow.all(), True)
+
+        response = self.client.get(reverse('users:subs', kwargs={'pk': self.profile2.pk}))
+        self.assertTemplateUsed(response, 'users/subscriptions.html')
+        self.assertContains(response, f"{self.profile1.user.get_username()}")
+
+
+
+
+
+
 
