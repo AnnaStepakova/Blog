@@ -61,11 +61,9 @@ class BlogpostDetailViewTest(TestCase):
         self.post = BlogPost.objects.create(author=self.user, title='test', snippet='test post', text='TestTest',
                                             tag='testing', category=self.category)
         self.comment = Comment.objects.create(blogpost=self.post, author=self.user, body='new comment')
+        self.reply = Comment(blogpost=self.post, author=self.user, body='my reply', reply=self.comment)
+        self.reply.save()
         self.response = self.client.get(reverse('blog:detail', kwargs={'pk': self.post.pk}))
-
-        # f = open("/tmp/index.html", 'wb')
-        # f.write(self.response.content)
-        # f.close()
 
     def test_detail_view(self):
         self.assertEqual(self.response.status_code, 200)
@@ -83,12 +81,14 @@ class BlogpostDetailViewTest(TestCase):
         self.assertContains(self.response, f"{self.post.title}")
         self.assertContains(self.response, f"{self.post.text}")
         self.assertContains(self.response, f"{self.post.tag}")
+        self.assertContains(self.response, f'{self.comment.body}')
+        self.assertContains(self.response, f'{self.reply.body}')
 
     def test_context_params(self):
         self.assertEqual(self.response.status_code, 200)
         self.assertTemplateUsed(self.response, 'blog/detail.html')
-        self.assertEqual(self.response.context['comments'].count(), 1)
-        self.assertQuerysetEqual(self.response.context['comments'], map(repr, [self.comment]))
+        self.assertEqual(self.response.context['comments'].count(), 2)
+        self.assertQuerysetEqual(self.response.context['comments'], map(repr, [self.reply, self.comment]))
         self.assertEqual(self.response.context['liked'], False)
 
     def test_context_comment_form(self):
@@ -100,8 +100,8 @@ class BlogpostDetailViewTest(TestCase):
 
         response = self.client.post('/blog/1/', {'body': 'my new comment'}, follow=False, secure=True)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(Comment.objects.all().count(), 2)
-        comm = Comment.objects.get(id=2)
+        self.assertEqual(Comment.objects.all().count(), 3)
+        comm = Comment.objects.get(id=3)
         self.assertEqual(comm.body, 'my new comment')
 
 
@@ -420,3 +420,29 @@ class LikeTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'blog/detail.html')
         self.assertEqual(self.post.likes.count(), 0)
+
+
+class ReplyToCommentTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.category = Category.objects.create(name='cat')
+        self.user = User.objects.create(username='BoB', first_name='Bob', last_name='Adams')
+        self.user.set_password('okt1267345')
+        self.user.save()
+        self.post = BlogPost(author=self.user, category=self.category, tag='some tag', title='new post',
+                             snippet='snippet', text='some text')
+        self.post.save()
+        self.comment = Comment.objects.create(blogpost=self.post, author=self.user, body='new comment')
+        self.logged_in = self.client.login(username='BoB', password='okt1267345')
+
+    def test_add_reply(self):
+        self.assertTrue(self.logged_in)
+        response = self.client.get(reverse('blog:detail', kwargs={'pk': self.post.pk}))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(f'/blog/{self.post.pk}/reply_to_comment/{self.comment.pk}/',
+                                    data={'body': 'my reply', 'comment_id': self.comment.pk},
+                                    follow=False)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Comment.objects.all().count(), 2)
+        comm = Comment.objects.get(id=2)
+        self.assertEqual(comm.body, 'my reply')

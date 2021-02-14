@@ -169,11 +169,22 @@ class CommentTest(TestCase):
                                         tag='testing', category=self.category)
         self.comment = Comment(blogpost=self.post, author=self.user, body='my comment')
         self.comment.save()
+        self.reply = Comment(blogpost=self.post, author=self.user, body='my reply', reply=self.comment)
+        self.reply.save()
 
     def test_author_label(self):
         comm = Comment.objects.get(id=1)
         field_label = comm._meta.get_field('author').verbose_name
         self.assertEquals(field_label, 'author')
+
+    def test_reply_label(self):
+        comm = Comment.objects.get(body='my comment')
+        field_label = comm._meta.get_field('reply').verbose_name
+        self.assertEquals(field_label, 'reply')
+
+        comm = Comment.objects.get(body='my reply')
+        field_label = comm._meta.get_field('reply').verbose_name
+        self.assertEquals(field_label, 'reply')
 
     def test_blogpost_label(self):
         comm = Comment.objects.get(id=1)
@@ -187,6 +198,10 @@ class CommentTest(TestCase):
 
     def test_body_length(self):
         comm = Comment.objects.get(id=1)
+        max_length = comm._meta.get_field('body').max_length
+        self.assertEquals(max_length, 500)
+
+        comm = Comment.objects.get(id=2)
         max_length = comm._meta.get_field('body').max_length
         self.assertEquals(max_length, 500)
 
