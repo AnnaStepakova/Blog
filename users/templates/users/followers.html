@@ -21,7 +21,12 @@
   </div>
 </div>
     <br/>
-    <h4>My followers:</h4>
+    {% if user == userprofile.user %}
+        <h4>My followers:</h4>
+    {% else %}
+        <h4>{{ userprofile.user.get_username }}`s followers:</h4>
+    {% endif %}
+
     <br/>
     {% for follower in followers %}
         <a href="{% url 'users:profile' follower.id %}" >{{ follower.user.get_username }} </a> <br/>

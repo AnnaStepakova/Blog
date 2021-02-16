@@ -2,6 +2,8 @@ from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import User
 from ckeditor.fields import RichTextField
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class Category(models.Model):
@@ -50,6 +52,13 @@ class UserProfile(models.Model):
 
     def get_absolute_url(self):
         return reverse('blog:index')
+
+
+@receiver(post_save, sender=User)
+def update_profile_signal(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance, bio='I have no bio yet :(')
+    instance.userprofile.save()
 
 
 class Comment(models.Model):

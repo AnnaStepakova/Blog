@@ -21,7 +21,11 @@
   </div>
 </div>
     <br/>
-    <h4>My subscriptions:</h4>
+    {% if user == userprofile.user %}
+        <h4>My subscribers:</h4>
+    {% else %}
+        <h4>{{ userprofile.user.get_username }}`s subscribers:</h4>
+    {% endif %}
     <br/>
     {% for sub in subs %}
         <a href="{% url 'users:profile' sub.id %}" >{{ sub.user.get_username }} </a> <br/>
