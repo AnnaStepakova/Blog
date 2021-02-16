@@ -93,8 +93,6 @@ class BlogPostTest(TestCase):
 class UserProfileTest(TestCase):
     def setUp(self):
         self.user = User.objects.create(username='BoB', first_name='Bob', last_name='Adams', password='okt11102012')
-        self.profile = UserProfile.objects.create(user=self.user, bio='Bio', instagram_link='instagram.com/anutka_st99',
-                                                  facebook_link='link1', twitter_link='link2', website_link='link3')
 
     def test_user_label(self):
         profile = UserProfile.objects.get(id=1)
@@ -156,8 +154,8 @@ class UserProfileTest(TestCase):
         self.assertEquals(profile.get_absolute_url(), '/blog/')
 
     def test_str(self):
-        profile = UserProfile.objects.get(id=1)
-        expected = f"{self.profile.user.username}|{self.profile.bio}"
+        profile = self.user.userprofile
+        expected = f"{profile.user.username}|{profile.bio}"
         self.assertEquals(expected, str(profile))
 
 

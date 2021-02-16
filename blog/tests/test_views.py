@@ -57,7 +57,6 @@ class BlogpostDetailViewTest(TestCase):
         self.user = User.objects.create(username='BoB', first_name='Bob', last_name='Adams')
         self.user.set_password('okt1267345')
         self.user.save()
-        self.profile = UserProfile.objects.create(user=self.user, bio='biobio')
         self.post = BlogPost.objects.create(author=self.user, title='test', snippet='test post', text='TestTest',
                                             tag='testing', category=self.category)
         self.comment = Comment.objects.create(blogpost=self.post, author=self.user, body='new comment')

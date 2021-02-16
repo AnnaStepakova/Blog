@@ -12,7 +12,7 @@ class ProfilePageViewTest(TestCase):
         self.user = User.objects.create(username='BoB', first_name='Bob', last_name='Adams')
         self.user.set_password('okt1267345')
         self.user.save()
-        self.profile = UserProfile.objects.create(user=self.user, bio='biobio')
+        self.profile = self.user.userprofile
         self.profile.save()
         self.logged_in = self.client.login(username='BoB', password='okt1267345')
 
@@ -39,8 +39,7 @@ class EditProfilePageViewTest(TestCase):
         self.user = User.objects.create(username='BoB', first_name='Bob', last_name='Adams')
         self.user.set_password('okt1267345')
         self.user.save()
-        self.profile = UserProfile.objects.create(user=self.user, bio='biobio')
-        self.profile.save()
+        self.profile = self.user.userprofile
         self.logged_in = self.client.login(username='BoB', password='okt1267345')
 
     def test_update_profile(self):
@@ -84,36 +83,19 @@ class CreateProfilePageViewTest(TestCase):
         self.user.save()
         self.logged_in = self.client.login(username='BoB', password='okt1267345')
 
-    def test_add_profile(self):
-        self.assertTrue(self.logged_in)
-        data = {'user': self.user, 'bio': 'bio', 'instagram_link': 'insta_link', 'facebook_link': 'facebook_link',
-                'twitter_link': 'tw_link', 'website_link': 'w_link'}
-        response = self.client.post(reverse('users:create_profile'), data, follow=False, secure=True)
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(UserProfile.objects.all().count(), 1)
-        profile = UserProfile.objects.get(user=self.user)
-        self.assertEqual(profile.bio, 'bio')
-        self.assertEqual(profile.user, self.user)
+    def test_default_profile_creation(self):
+        profile = self.user.userprofile
+        profile_in_db = UserProfile.objects.get(id=1)
+        self.assertEqual(profile, profile_in_db)
 
-    def test_add_profile_result(self):
-        self.assertTrue(self.logged_in)
-        data = {'user': self.user, 'bio': 'bio', 'instagram_link': 'insta_link', 'facebook_link': 'facebook_link',
-                'twitter_link': 'tw_link', 'website_link': 'w_link'}
-        response = self.client.post(reverse('users:create_profile'), data, follow=True, secure=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'blog/index.html')
-        self.assertEqual(UserProfile.objects.all().count(), 1)
-        profile = UserProfile.objects.get(user=self.user)
-        self.assertEqual(profile.bio, 'bio')
+    def test_default_profile_fields(self):
+        profile = self.user.userprofile
+        self.assertEqual(profile.bio, 'I have no bio yet :(')
         self.assertEqual(profile.user, self.user)
-
-    def test_add_no_profile(self):
-        self.assertTrue(self.logged_in)
-        data = {}
-        response = self.client.post(reverse('users:create_profile'), data, follow=False, secure=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'users/create_profile.html')
-        self.assertEqual(UserProfile.objects.all().count(), 0)
+        self.assertEqual(profile.instagram_link, None)
+        self.assertEqual(profile.facebook_link, None)
+        self.assertEqual(profile.twitter_link, None)
+        self.assertEqual(profile.website_link, None)
 
 
 class UserRegisterViewTest(TestCase):
@@ -223,18 +205,18 @@ class FollowTest(TestCase):
         self.user1.set_password('okt1267345')
         self.user1.save()
         self.logged_in1 = self.client.login(username='BoB1', password='okt1267345')
-        self.profile1 = UserProfile.objects.create(user=self.user1, bio='BoB1 bio')
+        self.profile1 = self.user1.userprofile
 
         self.user2 = User.objects.create(username='BoB2', first_name='Bob', last_name='Adams', email='bob@bob.com')
         self.user2.set_password('okt12')
         self.user2.save()
         self.logged_in2 = self.client.login(username='BoB2', password='okt12')
-        self.profile2 = UserProfile.objects.create(user=self.user2, bio='BoB2 bio')
+        self.profile2 = self.user2.userprofile
         self.category = Category.objects.create(name='cats')
         self.post = BlogPost.objects.create(author=self.user1, title='test', snippet='test post', text='TestTest',
                                             tag='testing', category=self.category)
         self.request = self.factory.post(reverse('users:profile', kwargs={'pk': self.profile1.pk}),
-                                    {'userprofile_to_follow_id': self.profile1.pk})
+                                         {'userprofile_to_follow_id': self.profile1.pk})
         self.request.user = self.user2
         self.response = follow(self.request, self.profile1.pk)
 
