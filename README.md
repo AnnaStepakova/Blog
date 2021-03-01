@@ -48,7 +48,11 @@ TODO:
 * add new test scenario
 * add something new to home page in addition to Blog
 
-I've done deploy to Heroku. Blog is available here: 
+I've done two deployments to Heroku. 
+Blog, deployed with Docker is available here:
+https://myblog2021deploywithdocker.herokuapp.com
+
+Deploy without Docker:
 https://myawesome2021blog.herokuapp.com
 
 At the moment after every new deploy static files (images) get lost. This happens due to
