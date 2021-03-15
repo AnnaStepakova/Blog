@@ -8,12 +8,12 @@ import json
 class IndexViewTest(TestCase):
     def setUp(self):
         self.client = Client()
-        Category.objects.create(name='cat')
-        User.objects.create(username='BoB', first_name='Bob', last_name='Adams', password='okt1267345')
+        self.category = Category.objects.create(name='cat')
+        self.user = User.objects.create(username='BoB', first_name='Bob', last_name='Adams', password='okt1267345')
 
     def test_index_view_with_post(self):
-        category = Category.objects.get(id=1)
-        user = User.objects.get(id=1)
+        category = Category.objects.get(id=self.category.id)
+        user = User.objects.get(id=self.user.id)
         post = BlogPost.objects.create(author=user, title='test1', snippet='test post1', text='TestTest1',
                                        tag='testing1', category=category)
         response = self.client.get(reverse('blog:index'))
@@ -97,11 +97,9 @@ class BlogpostDetailViewTest(TestCase):
         self.assertEqual(self.response.status_code, 200)
         self.assertTemplateUsed(self.response, 'blog/detail.html')
 
-        response = self.client.post('/blog/1/', {'body': 'my new comment'}, follow=False, secure=True)
+        response = self.client.post(f'/blog/{self.post.id}/', {'body': 'my new comment'}, follow=False, secure=True)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Comment.objects.all().count(), 3)
-        comm = Comment.objects.get(id=3)
-        self.assertEqual(comm.body, 'my new comment')
 
 
 class CategoryDetailViewTest(TestCase):
@@ -292,8 +290,6 @@ class AddCategoryViewTest(TestCase):
         response = self.client.post('/blog/addcategory/', data, follow=False, secure=True)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Category.objects.all().count(), 1)
-        category = Category.objects.get(id=1)
-        self.assertEqual(category.name, 'cats')
 
     def test_add_category_result(self):
         logged_in = self.client.login(username='BoB', password='okt1267345')
@@ -303,8 +299,6 @@ class AddCategoryViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'blog/index.html')
         self.assertEqual(Category.objects.all().count(), 1)
-        category = Category.objects.get(id=1)
-        self.assertEqual(category.name, 'cats')
 
     def test_add_no_category(self):
         logged_in = self.client.login(username='BoB', password='okt1267345')
@@ -380,7 +374,7 @@ class LikeTest(TestCase):
         self.assertEqual(self.response.status_code, 200)
         self.assertTemplateUsed(self.response, 'blog/detail.html')
 
-        response = self.client.post('/blog/liked/1/', data={'post_id': self.post.pk}, follow=False)
+        response = self.client.post(f'/blog/liked/{self.post.id}/', data={'post_id': self.post.pk}, follow=False)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(self.post.likes.count(), 1)
 
@@ -388,7 +382,7 @@ class LikeTest(TestCase):
         self.assertEqual(self.response.status_code, 200)
         self.assertTemplateUsed(self.response, 'blog/detail.html')
 
-        response = self.client.post('/blog/liked/1/', data={'post_id': self.post.pk}, follow=True)
+        response = self.client.post(f'/blog/liked/{self.post.id}/', data={'post_id': self.post.pk}, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'blog/detail.html')
         self.assertEqual(self.post.likes.count(), 1)
@@ -397,12 +391,12 @@ class LikeTest(TestCase):
         self.assertEqual(self.response.status_code, 200)
         self.assertTemplateUsed(self.response, 'blog/detail.html')
 
-        response = self.client.post('/blog/liked/1/', data={'post_id': self.post.pk}, follow=True)
+        response = self.client.post(f'/blog/liked/{self.post.id}/', data={'post_id': self.post.pk}, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'blog/detail.html')
         self.assertEqual(self.post.likes.count(), 1)
 
-        response = self.client.post('/blog/liked/1/', data={'post_id': self.post.pk}, follow=False)
+        response = self.client.post(f'/blog/liked/{self.post.id}/', data={'post_id': self.post.pk}, follow=False)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(self.post.likes.count(), 0)
 
@@ -410,12 +404,12 @@ class LikeTest(TestCase):
         self.assertEqual(self.response.status_code, 200)
         self.assertTemplateUsed(self.response, 'blog/detail.html')
 
-        response = self.client.post('/blog/liked/1/', data={'post_id': self.post.pk}, follow=True)
+        response = self.client.post(f'/blog/liked/{self.post.id}/', data={'post_id': self.post.pk}, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'blog/detail.html')
         self.assertEqual(self.post.likes.count(), 1)
 
-        response = self.client.post('/blog/liked/1/', data={'post_id': self.post.pk}, follow=True)
+        response = self.client.post(f'/blog/liked/{self.post.id}/', data={'post_id': self.post.pk}, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'blog/detail.html')
         self.assertEqual(self.post.likes.count(), 0)
@@ -443,5 +437,3 @@ class ReplyToCommentTest(TestCase):
                                     follow=False)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Comment.objects.all().count(), 2)
-        comm = Comment.objects.get(id=2)
-        self.assertEqual(comm.body, 'my reply')
