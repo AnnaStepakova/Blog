@@ -1,6 +1,6 @@
 # Blog
 
-![Build Status](https://github.com/AnnaStepakova/Blog/actions/workflows/ci.yml/badge.svg?branch=github-ci)
+![Build Status](https://github.com/AnnaStepakova/Blog/actions/workflows/ci.yml/badge.svg)
 
 This is the project I learn Django with. Educational videos from [Codemy.com](https://www.youtube.com/channel/UCFB0dxMudkws1q8w5NJEAmw) 
 Youtube channel were used as a basis.
