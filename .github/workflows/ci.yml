@@ -28,10 +28,7 @@ jobs:
         python-version: [3.7, 3.8, 3.9]
 
     env:
-      SQL_ENGINE: django.db.backends.postgresql
-      SQL_DATABASE: github_actions
-      SQL_USER: postgres
-      SQL_PASSWORD: postgres
+      DATABASE_URL: postgres://postgres:postgres@localhost/github_actions
 
     steps:
     - uses: actions/checkout@v2
