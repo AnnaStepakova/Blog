@@ -85,7 +85,7 @@ class CreateProfilePageViewTest(TestCase):
 
     def test_default_profile_creation(self):
         profile = self.user.userprofile
-        profile_in_db = UserProfile.objects.get(id=1)
+        profile_in_db = UserProfile.objects.get(id=self.user.userprofile.id)
         self.assertEqual(profile, profile_in_db)
 
     def test_default_profile_fields(self):
@@ -145,7 +145,7 @@ class UserEditViewTest(TestCase):
         response = self.client.post(reverse('users:edit'), data, follow=False, secure=True)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(User.objects.all().count(), 1)
-        user = User.objects.get(id=1)
+        user = User.objects.get(id=self.user.id)
         self.assertEqual(user.username, 'bob2')
 
     def test_edit_settings_result(self):
@@ -155,7 +155,7 @@ class UserEditViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'home/home.html')
         self.assertEqual(User.objects.all().count(), 1)
-        user = User.objects.get(id=1)
+        user = User.objects.get(id=self.user.id)
         self.assertEqual(user.username, 'bob2')
 
 
