@@ -68,11 +68,6 @@ class BlogpostDetailViewTest(TestCase):
         self.assertEqual(self.response.status_code, 200)
         self.assertTemplateUsed(self.response, 'blog/detail.html')
 
-    def test_post_if_liked(self):
-        self.assertEqual(self.response.status_code, 200)
-        self.assertTemplateUsed(self.response, 'blog/detail.html')
-        self.assertIn('liked', self.response.context)
-
     def test_post_context_text(self):
         self.assertEqual(self.response.status_code, 200)
         self.assertTemplateUsed(self.response, 'blog/detail.html')
@@ -88,7 +83,6 @@ class BlogpostDetailViewTest(TestCase):
         self.assertTemplateUsed(self.response, 'blog/detail.html')
         self.assertEqual(self.response.context['comments'].count(), 2)
         self.assertQuerysetEqual(self.response.context['comments'], map(repr, [self.reply, self.comment]))
-        self.assertEqual(self.response.context['liked'], False)
 
     def test_context_comment_form(self):
         logged_in = self.client.login(username='BoB', password='okt1267345')
@@ -375,16 +369,9 @@ class LikeTest(TestCase):
         self.assertTemplateUsed(self.response, 'blog/detail.html')
 
         response = self.client.post(f'/blog/liked/{self.post.id}/', data={'post_id': self.post.pk}, follow=False)
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(self.post.likes.count(), 1)
-
-    def test_like_result_page(self):
-        self.assertEqual(self.response.status_code, 200)
-        self.assertTemplateUsed(self.response, 'blog/detail.html')
-
-        response = self.client.post(f'/blog/liked/{self.post.id}/', data={'post_id': self.post.pk}, follow=True)
+        data = json.loads(response.content)
+        self.assertEqual(data['likes'], 1)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'blog/detail.html')
         self.assertEqual(self.post.likes.count(), 1)
 
     def test_unlike(self):
@@ -393,25 +380,14 @@ class LikeTest(TestCase):
 
         response = self.client.post(f'/blog/liked/{self.post.id}/', data={'post_id': self.post.pk}, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'blog/detail.html')
-        self.assertEqual(self.post.likes.count(), 1)
-
-        response = self.client.post(f'/blog/liked/{self.post.id}/', data={'post_id': self.post.pk}, follow=False)
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(self.post.likes.count(), 0)
-
-    def test_unlike_result_page(self):
-        self.assertEqual(self.response.status_code, 200)
-        self.assertTemplateUsed(self.response, 'blog/detail.html')
-
-        response = self.client.post(f'/blog/liked/{self.post.id}/', data={'post_id': self.post.pk}, follow=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'blog/detail.html')
+        data = json.loads(response.content)
+        self.assertEqual(data['likes'], 1)
         self.assertEqual(self.post.likes.count(), 1)
 
         response = self.client.post(f'/blog/liked/{self.post.id}/', data={'post_id': self.post.pk}, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'blog/detail.html')
+        data = json.loads(response.content)
+        self.assertEqual(data['likes'], 0)
         self.assertEqual(self.post.likes.count(), 0)
 
 
