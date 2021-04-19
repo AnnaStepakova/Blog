@@ -4,7 +4,7 @@ from django.template import RequestContext
 from .models import BlogPost, Category, Comment
 from django.views import generic
 from django.shortcuts import get_object_or_404, render
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from .forms import BlogPostForm, UpdateBlogPostForm, AddCategoryForm, CommentForm
 from django.urls import reverse_lazy
@@ -36,7 +36,7 @@ class DetailView(generic.DetailView):
         liked = False
         if curr_post.likes.filter(id=self.request.user.id).exists():
             liked = True
-        data['liked'] = liked
+        # data['liked'] = liked
         comments_connected = Comment.objects.filter(
             blogpost=self.get_object()).order_by('-date_posted')
         data['comments'] = comments_connected
@@ -104,14 +104,16 @@ class SortTagView(generic.ListView):
 
 
 def like(request, post_id):
-    post = get_object_or_404(BlogPost, pk=post_id)
-    liked = False
-    if post.likes.filter(id=request.user.id).exists():
-        post.likes.remove(request.user)
-    else:
-        post.likes.add(request.user)
-        liked = True
-    post.save()
+    user = request.user
+    if request.method == 'POST':
+        post = get_object_or_404(BlogPost, pk=post_id)
+        if post.likes.filter(id=request.user.id).exists():
+            post.likes.remove(request.user)
+        else:
+            post.likes.add(request.user)
+        post.save()
+        data = {'likes': post.likes.count()}
+        return JsonResponse(data)
     return HttpResponseRedirect(reverse('blog:detail', args=[str(post_id)]))
 
 
